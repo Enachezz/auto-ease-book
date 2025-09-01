@@ -3,7 +3,7 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { 
   Car, 
   Wrench, 
@@ -17,6 +17,7 @@ import {
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
 
   // Show loading state while auth is being checked
   if (loading) {
@@ -59,7 +60,7 @@ const Index = () => {
               <h1 className="text-3xl font-bold text-foreground">Welcome back, {profile.full_name.split(' ')[0]}!</h1>
               <p className="text-muted-foreground">Find trusted garages for your car repair needs</p>
             </div>
-            <Button>
+            <Button onClick={() => navigate('/request-service')}>
               <Plus className="h-4 w-4 mr-2" />
               Request Service
             </Button>
@@ -184,9 +185,9 @@ const Index = () => {
               <h1 className="text-3xl font-bold text-foreground">Garage Dashboard</h1>
               <p className="text-muted-foreground">Manage your jobs and grow your business</p>
             </div>
-            <Button>
+            <Button onClick={() => navigate('/garage')}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Service
+              Manage Garage
             </Button>
           </div>
 

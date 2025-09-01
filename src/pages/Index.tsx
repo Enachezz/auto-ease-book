@@ -3,6 +3,7 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Navigate } from 'react-router-dom';
 import { 
   Car, 
   Wrench, 
@@ -15,10 +16,37 @@ import {
 } from 'lucide-react';
 
 const Index = () => {
-  const { profile } = useAuth();
+  const { user, profile, loading } = useAuth();
 
+  // Show loading state while auth is being checked
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Show message if profile is still loading or missing
   if (!profile) {
-    return null;
+    return (
+      <Layout>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Setting up your profile...</h2>
+            <p className="text-muted-foreground">Please wait while we complete your account setup.</p>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   // Car Owner Dashboard

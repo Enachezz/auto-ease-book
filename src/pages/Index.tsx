@@ -1,18 +1,12 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
 import { 
   Car, 
   Wrench, 
-  Calendar, 
-  Star, 
-  MapPin, 
-  Clock,
-  DollarSign,
-  Plus
+  CheckCircle
 } from 'lucide-react';
 
 const Index = () => {
@@ -31,380 +25,207 @@ const Index = () => {
     );
   }
 
-  // Redirect to auth if not logged in
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Show message if profile is still loading or missing
-  if (!profile) {
-    return (
-      <Layout>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Setting up your profile...</h2>
-            <p className="text-muted-foreground">Please wait while we complete your account setup.</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Car Owner Dashboard
-  if (profile.user_type === 'car_owner') {
-    return (
-      <Layout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Welcome back, {profile.full_name.split(' ')[0]}!</h1>
-              <p className="text-muted-foreground">Find trusted garages for your car repair needs</p>
-            </div>
-            <Button onClick={() => navigate('/request-service')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Request Service
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Requests</CardTitle>
-                <Wrench className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">2</div>
-                <p className="text-xs text-muted-foreground">Awaiting quotes</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Upcoming Bookings</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1</div>
-                <p className="text-xs text-muted-foreground">Next: Oil change tomorrow</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">My Cars</CardTitle>
-                <Car className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">1</div>
-                <p className="text-xs text-muted-foreground">Add another vehicle</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Quotes</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Brake Pad Replacement</h4>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      Mike's Auto Shop
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-lg">$245</p>
-                    <Badge variant="secondary">Pending</Badge>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Oil Change</h4>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      Quick Lube Center
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-lg">$45</p>
-                    <Badge>Accepted</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recommended Services</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Annual Inspection</h4>
-                    <p className="text-sm text-muted-foreground">Due in 30 days</p>
-                    <div className="flex items-center mt-2">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-sm ml-1">4.8 rating nearby</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Find Service
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Tire Rotation</h4>
-                    <p className="text-sm text-muted-foreground">Recommended every 6 months</p>
-                    <div className="flex items-center mt-2">
-                      <DollarSign className="h-4 w-4 text-green-600" />
-                      <span className="text-sm ml-1">From $25</span>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">
-                    Get Quotes
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Garage Dashboard
-  if (profile.user_type === 'garage') {
-    return (
-      <Layout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Garage Dashboard</h1>
-              <p className="text-muted-foreground">Manage your jobs and grow your business</p>
-            </div>
-            <Button onClick={() => navigate('/garage')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Manage Garage
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Requests</CardTitle>
-                <Wrench className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">Awaiting your quote</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">In progress</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$2,450</div>
-                <p className="text-xs text-muted-foreground">Revenue</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rating</CardTitle>
-                <Star className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">4.8</div>
-                <p className="text-xs text-muted-foreground">From 24 reviews</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Job Requests</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Brake Service - 2019 Honda Civic</h4>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      2.5 miles away
-                    </p>
-                    <p className="text-sm text-muted-foreground">Budget: $200-300</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="secondary">New</Badge>
-                    <Button size="sm" className="mt-2">
-                      Quote
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">Oil Change - 2021 Toyota Camry</h4>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      1.2 miles away
-                    </p>
-                    <p className="text-sm text-muted-foreground">Budget: $40-60</p>
-                  </div>
-                  <div className="text-right">
-                    <Badge variant="secondary">New</Badge>
-                    <Button size="sm" className="mt-2">
-                      Quote
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Today's Schedule</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">9:00 AM - Brake Inspection</h4>
-                    <p className="text-sm text-muted-foreground">Sarah Johnson</p>
-                    <p className="text-sm text-muted-foreground">2018 Ford Escape</p>
-                  </div>
-                  <Badge>Confirmed</Badge>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">2:00 PM - Oil Change</h4>
-                    <p className="text-sm text-muted-foreground">Mike Chen</p>
-                    <p className="text-sm text-muted-foreground">2020 Honda Accord</p>
-                  </div>
-                  <Badge>Confirmed</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  // Admin Dashboard
+  // Homepage for everyone (authenticated and non-authenticated users)
   return (
     <Layout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage platform operations and moderate content</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-              <Wrench className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">Garages awaiting approval</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-              <Car className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">248</div>
-              <p className="text-xs text-muted-foreground">Car owners registered</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Garages</CardTitle>
-              <Wrench className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">42</div>
-              <p className="text-xs text-muted-foreground">Approved garages</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Month</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">127</div>
-              <p className="text-xs text-muted-foreground">Jobs completed</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Garage Approvals</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium">Downtown Auto Repair</h4>
-                  <p className="text-sm text-muted-foreground">123 Main St, City</p>
-                  <p className="text-sm text-muted-foreground">Services: Brake, Engine, Electrical</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline">
-                    Review
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-br from-primary/5 to-blue-50 dark:from-primary/10 dark:to-slate-900 rounded-2xl overflow-hidden mb-16">
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        <div className="relative px-8 py-16 lg:py-24">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <span>🚗</span>
+              Join thousands of satisfied customers
+            </div>
+            <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+              Find local garages you can{' '}
+              <span className="text-primary">rely on</span>
+            </h1>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              We'll help you save money on car repairs in just a few clicks. 
+              Connect with trusted mechanics and get competitive quotes.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              {!user ? (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/auth')}
+                  >
+                    Get Started Free
                   </Button>
-                  <Button size="sm">
-                    Approve
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/auth')}
+                  >
+                    For Garages
                   </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </>
+              ) : profile?.user_type === 'car_owner' ? (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/request-service')}
+                  >
+                    Request Service
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/my-requests')}
+                  >
+                    My Requests
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/garage')}
+                  >
+                    Manage Garage
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="text-lg px-8 py-6 h-auto"
+                    onClick={() => navigate('/job-requests')}
+                  >
+                    Browse Jobs
+                  </Button>
+                </>
+              )}
+            </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4 p-4 border rounded-lg">
-                <div className="flex-1">
-                  <p className="text-sm">New garage registration</p>
-                  <p className="text-xs text-muted-foreground">5 minutes ago</p>
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <div className="flex text-yellow-400">
+                  ★★★★★
                 </div>
+                <span>4.8/5 rating</span>
               </div>
-              <div className="flex items-center gap-4 p-4 border rounded-lg">
-                <div className="flex-1">
-                  <p className="text-sm">Job completed: Oil change</p>
-                  <p className="text-xs text-muted-foreground">1 hour ago</p>
-                </div>
-              </div>
-            </CardContent>
+              <div className="h-4 w-px bg-border hidden sm:block"></div>
+              <span>10,000+ happy customers</span>
+              <div className="h-4 w-px bg-border hidden sm:block"></div>
+              <span>500+ trusted garages</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="mb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">How AutoEase Works</h2>
+          <p className="text-lg text-muted-foreground">Simple steps to get your car repaired</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Car className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">1. Describe Your Issue</h3>
+            <p className="text-muted-foreground">Tell us what's wrong with your car and where you're located</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Wrench className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">2. Get Quotes</h3>
+            <p className="text-muted-foreground">Receive competitive quotes from local trusted garages</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">3. Book & Repair</h3>
+            <p className="text-muted-foreground">Choose the best quote and book your repair appointment</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials */}
+      <div className="mb-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">What drivers say about our garages</h2>
+          <p className="text-lg text-muted-foreground">We think they're great. But don't just take our word for it...</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="p-6">
+            <div className="flex text-yellow-400 mb-4">★★★★★</div>
+            <p className="text-sm text-muted-foreground mb-4">
+              "Amazing service! The garage was very professional and fixed my BMW quickly. 
+              Great communication throughout the process."
+            </p>
+            <div className="text-sm font-medium">BMW 5 Series owner</div>
           </Card>
+          
+          <Card className="p-6">
+            <div className="flex text-yellow-400 mb-4">★★★★★</div>
+            <p className="text-sm text-muted-foreground mb-4">
+              "Really good service, kept me informed with photos and texts. 
+              Well worth the money and very competitive pricing."
+            </p>
+            <div className="text-sm font-medium">Vauxhall Corsa owner</div>
+          </Card>
+          
+          <Card className="p-6">
+            <div className="flex text-yellow-400 mb-4">★★★★★</div>
+            <p className="text-sm text-muted-foreground mb-4">
+              "Highly recommend! Great service, booked me in very quickly. 
+              Charlie was very friendly and helped me understand the problem."
+            </p>
+            <div className="text-sm font-medium">Peugeot 2008 owner</div>
+          </Card>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center">
+        <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
+        <p className="text-lg mb-6 opacity-90">
+          Join thousands of drivers who trust AutoEase for their car repairs
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {!user ? (
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => navigate('/auth')}
+            >
+              Sign Up Now
+            </Button>
+          ) : profile?.user_type === 'car_owner' ? (
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => navigate('/request-service')}
+            >
+              Request Service
+            </Button>
+          ) : (
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => navigate('/garage')}
+            >
+              Join as Garage
+            </Button>
+          )}
         </div>
       </div>
     </Layout>

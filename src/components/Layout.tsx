@@ -48,6 +48,14 @@ export function Layout({ children }: LayoutProps) {
                       <List className="h-4 w-4 mr-2" />
                       My Requests
                     </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => navigate('/my-cars')}
+                    >
+                      <Car className="h-4 w-4 mr-2" />
+                      My Cars
+                    </Button>
                   </>
                 )}
                 {profile.user_type === 'garage' && (

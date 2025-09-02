@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import RequestService from "./pages/RequestService";
 import JobRequests from "./pages/JobRequests";
+import MyCars from "./pages/MyCars";
 import GarageManagement from "./pages/GarageManagement";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/request-service" element={<RequestService />} />
             <Route path="/my-requests" element={<JobRequests />} />
+            <Route path="/my-cars" element={<MyCars />} />
             <Route path="/garage" element={<GarageManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -19,7 +19,7 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Se încarcă...</p>
         </div>
       </div>
     );
@@ -37,15 +37,15 @@ const Index = () => {
           <div className="max-w-4xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
               <span>🚗</span>
-              Join thousands of satisfied customers
+              Alătură-te miilor de clienți satisfăcuți
             </div>
             <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-              Find local garages you can{' '}
-              <span className="text-primary">rely on</span>
+              Găsește service-uri locale pe care te poți{' '}
+              <span className="text-primary">baza</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              We'll help you save money on car repairs in just a few clicks. 
-              Connect with trusted mechanics and get competitive quotes.
+              Te ajutăm să economisești bani la reparațiile auto în doar câteva click-uri. 
+              Conectează-te cu mecanici de încredere și obține oferte competitive.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -56,7 +56,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/auth')}
                   >
-                    Get Started Free
+                    Începe Gratuit
                   </Button>
                   <Button 
                     variant="outline" 
@@ -64,7 +64,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/auth')}
                   >
-                    For Garages
+                    Pentru Service-uri
                   </Button>
                 </>
               ) : profile?.user_type === 'car_owner' ? (
@@ -74,7 +74,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/request-service')}
                   >
-                    Request Service
+                    Solicită Service
                   </Button>
                   <Button 
                     variant="outline" 
@@ -82,7 +82,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/my-requests')}
                   >
-                    My Requests
+                    Solicitările Mele
                   </Button>
                 </>
               ) : (
@@ -92,7 +92,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/garage')}
                   >
-                    Manage Garage
+                    Gestionează Service-ul
                   </Button>
                   <Button 
                     variant="outline" 
@@ -100,7 +100,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/job-requests')}
                   >
-                    Browse Jobs
+                    Caută Lucrări
                   </Button>
                 </>
               )}
@@ -112,12 +112,12 @@ const Index = () => {
                 <div className="flex text-yellow-400">
                   ★★★★★
                 </div>
-                <span>4.8/5 rating</span>
+                <span>4.8/5 evaluare</span>
               </div>
               <div className="h-4 w-px bg-border hidden sm:block"></div>
-              <span>10,000+ happy customers</span>
+              <span>10,000+ clienți mulțumiți</span>
               <div className="h-4 w-px bg-border hidden sm:block"></div>
-              <span>500+ trusted garages</span>
+              <span>500+ service-uri de încredere</span>
             </div>
           </div>
         </div>
@@ -126,8 +126,8 @@ const Index = () => {
       {/* How it works */}
       <div className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">How AutoEase Works</h2>
-          <p className="text-lg text-muted-foreground">Simple steps to get your car repaired</p>
+          <h2 className="text-3xl font-bold mb-4">Cum Funcționează AutoEase</h2>
+          <p className="text-lg text-muted-foreground">Pași simpli pentru a-ți repara mașina</p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
@@ -135,24 +135,24 @@ const Index = () => {
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Car className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">1. Describe Your Issue</h3>
-            <p className="text-muted-foreground">Tell us what's wrong with your car and where you're located</p>
+            <h3 className="text-xl font-semibold mb-2">1. Descrie Problema</h3>
+            <p className="text-muted-foreground">Spune-ne ce nu merge la mașina ta și unde te afli</p>
           </div>
           
           <div className="text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <Wrench className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">2. Get Quotes</h3>
-            <p className="text-muted-foreground">Receive competitive quotes from local trusted garages</p>
+            <h3 className="text-xl font-semibold mb-2">2. Primește Oferte</h3>
+            <p className="text-muted-foreground">Primește oferte competitive de la service-uri locale de încredere</p>
           </div>
           
           <div className="text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">3. Book & Repair</h3>
-            <p className="text-muted-foreground">Choose the best quote and book your repair appointment</p>
+            <h3 className="text-xl font-semibold mb-2">3. Rezervă & Repară</h3>
+            <p className="text-muted-foreground">Alege cea mai bună ofertă și rezervă programarea pentru reparație</p>
           </div>
         </div>
       </div>
@@ -160,45 +160,45 @@ const Index = () => {
       {/* Testimonials */}
       <div className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What drivers say about our garages</h2>
-          <p className="text-lg text-muted-foreground">We think they're great. But don't just take our word for it...</p>
+          <h2 className="text-3xl font-bold mb-4">Ce spun șoferii despre service-urile noastre</h2>
+          <p className="text-lg text-muted-foreground">Credem că sunt grozave. Dar nu lua doar cuvântul nostru...</p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="p-6">
             <div className="flex text-yellow-400 mb-4">★★★★★</div>
             <p className="text-sm text-muted-foreground mb-4">
-              "Amazing service! The garage was very professional and fixed my BMW quickly. 
-              Great communication throughout the process."
+              "Service uimitor! Service-ul a fost foarte profesionist și mi-a reparat BMW-ul rapid. 
+              Comunicare excelentă pe tot parcursul procesului."
             </p>
-            <div className="text-sm font-medium">BMW 5 Series owner</div>
+            <div className="text-sm font-medium">Proprietar BMW Seria 5</div>
           </Card>
           
           <Card className="p-6">
             <div className="flex text-yellow-400 mb-4">★★★★★</div>
             <p className="text-sm text-muted-foreground mb-4">
-              "Really good service, kept me informed with photos and texts. 
-              Well worth the money and very competitive pricing."
+              "Service foarte bun, m-au ținut informat cu poze și mesaje. 
+              Merită banii și prețuri foarte competitive."
             </p>
-            <div className="text-sm font-medium">Vauxhall Corsa owner</div>
+            <div className="text-sm font-medium">Proprietar Vauxhall Corsa</div>
           </Card>
           
           <Card className="p-6">
             <div className="flex text-yellow-400 mb-4">★★★★★</div>
             <p className="text-sm text-muted-foreground mb-4">
-              "Highly recommend! Great service, booked me in very quickly. 
-              Charlie was very friendly and helped me understand the problem."
+              "Recomand cu încredere! Service excelent, m-au programat foarte repede. 
+              Charlie a fost foarte prietenos și m-a ajutat să înțeleg problema."
             </p>
-            <div className="text-sm font-medium">Peugeot 2008 owner</div>
+            <div className="text-sm font-medium">Proprietar Peugeot 2008</div>
           </Card>
         </div>
       </div>
 
       {/* CTA Section */}
       <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to get started?</h2>
+        <h2 className="text-3xl font-bold mb-4">Gata să începi?</h2>
         <p className="text-lg mb-6 opacity-90">
-          Join thousands of drivers who trust AutoEase for their car repairs
+          Alătură-te miilor de șoferi care au încredere în AutoEase pentru reparațiile auto
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {!user ? (
@@ -207,7 +207,7 @@ const Index = () => {
               size="lg"
               onClick={() => navigate('/auth')}
             >
-              Sign Up Now
+              Înregistrează-te Acum
             </Button>
           ) : profile?.user_type === 'car_owner' ? (
             <Button 
@@ -215,7 +215,7 @@ const Index = () => {
               size="lg"
               onClick={() => navigate('/request-service')}
             >
-              Request Service
+              Solicită Service
             </Button>
           ) : (
             <Button 
@@ -223,7 +223,7 @@ const Index = () => {
               size="lg"
               onClick={() => navigate('/garage')}
             >
-              Join as Garage
+              Înscrie-te ca Service
             </Button>
           )}
         </div>

@@ -96,24 +96,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         toast({
-          title: "Error",
+          title: "Eroare",
           description: error.message,
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Success",
-          description: "Please check your email to confirm your account.",
+          title: "Succes",
+          description: "Verifică-ți emailul pentru a confirma contul.",
         });
       }
 
       return { error };
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+        toast({
+          title: "Eroare",
+          description: error.message,
+          variant: "destructive",
+        });
       return { error };
     }
   };
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         toast({
-          title: "Error",
+          title: "Eroare",
           description: error.message,
           variant: "destructive",
         });
@@ -135,11 +135,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error };
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+        toast({
+          title: "Eroare",
+          description: error.message,
+          variant: "destructive",
+        });
       return { error };
     }
   };
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (error) {
         toast({
-          title: "Error",
+          title: "Eroare",
           description: error.message,
           variant: "destructive",
         });
@@ -158,11 +158,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error };
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+        toast({
+          title: "Eroare",
+          description: error.message,
+          variant: "destructive",
+        });
       return { error };
     }
   };

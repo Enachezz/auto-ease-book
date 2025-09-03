@@ -200,11 +200,11 @@ export default function RequestService() {
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => step === 2 ? setStep(1) : navigate('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Înapoi
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Request Service</h1>
-            <p className="text-muted-foreground">Get quotes from local garages</p>
+            <h1 className="text-3xl font-bold">Solicită Service</h1>
+            <p className="text-muted-foreground">Obține oferte de la service-uri locale</p>
           </div>
         </div>
 
@@ -214,14 +214,14 @@ export default function RequestService() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
               1
             </div>
-            <span className="font-medium">Your Job</span>
+            <span className="font-medium">Lucrarea Ta</span>
           </div>
           <div className="w-20 h-px bg-border"></div>
           <div className={`flex items-center space-x-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
               2
             </div>
-            <span className="font-medium">Details</span>
+            <span className="font-medium">Detalii</span>
           </div>
         </div>
 
@@ -231,7 +231,7 @@ export default function RequestService() {
             <div className="relative mb-8">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Search for service"
+                placeholder="Caută service"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg"
@@ -242,7 +242,7 @@ export default function RequestService() {
               <>
                 {/* Most Popular Section */}
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold mb-4">Most popular</h2>
+                  <h2 className="text-xl font-semibold mb-4">Cele mai populare</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {popularCategories.map((category) => (
                       <Card key={category.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
@@ -269,7 +269,7 @@ export default function RequestService() {
                 {/* Other Services */}
                 {otherCategories.length > 0 && (
                   <div>
-                    <h2 className="text-xl font-semibold mb-4">Other</h2>
+                    <h2 className="text-xl font-semibold mb-4">Altele</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {otherCategories.map((category) => (
                         <Card key={category.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
@@ -298,7 +298,7 @@ export default function RequestService() {
 
             {searchTerm && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+                <h2 className="text-xl font-semibold mb-4">Rezultatele Căutării</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredCategories.map((category) => (
                     <Card key={category.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
@@ -322,7 +322,7 @@ export default function RequestService() {
                 </div>
                 {filteredCategories.length === 0 && (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">No services found matching "{searchTerm}"</p>
+                    <p className="text-muted-foreground">Nu au fost găsite service-uri pentru "{searchTerm}"</p>
                   </div>
                 )}
               </div>
@@ -336,10 +336,10 @@ export default function RequestService() {
               <Card>
                 <CardContent className="p-6 text-center">
                   <Car className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-medium mb-2">No cars added yet</h3>
-                  <p className="text-muted-foreground mb-4">Add your car to request services</p>
+                  <h3 className="text-lg font-medium mb-2">Nu ai adăugat mașini încă</h3>
+                  <p className="text-muted-foreground mb-4">Adaugă mașina ta pentru a solicita service-uri</p>
                   <Button onClick={() => setShowAddCar(true)}>
-                    Add Your Car
+                    Adaugă Mașina Ta
                   </Button>
                 </CardContent>
               </Card>
@@ -348,16 +348,16 @@ export default function RequestService() {
             {showAddCar && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Add Your Car</CardTitle>
+                  <CardTitle>Adaugă Mașina Ta</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAddCar} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="make">Make</Label>
+                        <Label htmlFor="make">Marcă</Label>
                         <Select value={newCar.make_id} onValueChange={(value) => setNewCar({ ...newCar, make_id: value, model_id: '' })}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select make" />
+                            <SelectValue placeholder="Selectează marca" />
                           </SelectTrigger>
                           <SelectContent>
                             {makes.map((make) => (
@@ -370,7 +370,7 @@ export default function RequestService() {
                         <Label htmlFor="model">Model</Label>
                         <Select value={newCar.model_id} onValueChange={(value) => setNewCar({ ...newCar, model_id: value })} disabled={!newCar.make_id}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select model" />
+                            <SelectValue placeholder="Selectează modelul" />
                           </SelectTrigger>
                           <SelectContent>
                             {filteredModels.map((model) => (
@@ -382,7 +382,7 @@ export default function RequestService() {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="year">Year</Label>
+                        <Label htmlFor="year">An</Label>
                         <Input
                           type="number"
                           min="1900"
@@ -393,28 +393,28 @@ export default function RequestService() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="color">Color</Label>
+                        <Label htmlFor="color">Culoare</Label>
                         <Input
                           value={newCar.color}
                           onChange={(e) => setNewCar({ ...newCar, color: e.target.value })}
-                          placeholder="e.g. Blue"
+                          placeholder="ex. Albastru"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="license_plate">License Plate</Label>
+                        <Label htmlFor="license_plate">Număr de Înmatriculare</Label>
                         <Input
                           value={newCar.license_plate}
                           onChange={(e) => setNewCar({ ...newCar, license_plate: e.target.value })}
-                          placeholder="ABC123"
+                          placeholder="B123ABC"
                         />
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button type="submit" disabled={loading}>
-                        {loading ? 'Adding...' : 'Add Car'}
+                        {loading ? 'Se adaugă...' : 'Adaugă Mașina'}
                       </Button>
                       <Button type="button" variant="outline" onClick={() => setShowAddCar(false)}>
-                        Cancel
+                        Anulează
                       </Button>
                     </div>
                   </form>
@@ -425,18 +425,18 @@ export default function RequestService() {
             {cars.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Service Request Details</CardTitle>
+                  <CardTitle>Detaliile Solicitării de Service</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Selected service: {categories.find(c => c.id === formData.category_id)?.name}
+                    Service selectat: {categories.find(c => c.id === formData.category_id)?.name}
                   </p>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                      <Label htmlFor="car">Select Your Car</Label>
+                      <Label htmlFor="car">Selectează Mașina Ta</Label>
                       <Select value={formData.car_id} onValueChange={(value) => setFormData({ ...formData, car_id: value })}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Choose your car" />
+                          <SelectValue placeholder="Alege mașina ta" />
                         </SelectTrigger>
                         <SelectContent>
                           {cars.map((car) => {
@@ -451,26 +451,26 @@ export default function RequestService() {
                         </SelectContent>
                       </Select>
                       <Button type="button" variant="link" className="p-0 h-auto mt-1" onClick={() => setShowAddCar(true)}>
-                        + Add another car
+                        + Adaugă o altă mașină
                       </Button>
                     </div>
 
                     <div>
-                      <Label htmlFor="title">Service Title</Label>
+                      <Label htmlFor="title">Titlul Service-ului</Label>
                       <Input
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="e.g. Brake pads replacement"
+                        placeholder="ex. Înlocuire placuțe frână"
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">Descriere</Label>
                       <Textarea
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Describe the problem or service needed in detail..."
+                        placeholder="Descrie problema sau service-ul necesar în detaliu..."
                         rows={4}
                         required
                       />
@@ -478,20 +478,20 @@ export default function RequestService() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="urgency">Urgency</Label>
+                        <Label htmlFor="urgency">Urgența</Label>
                         <Select value={formData.urgency} onValueChange={(value) => setFormData({ ...formData, urgency: value })}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="low">Low - When convenient</SelectItem>
-                            <SelectItem value="medium">Medium - This week</SelectItem>
-                            <SelectItem value="high">High - ASAP</SelectItem>
+                            <SelectItem value="low">Scăzută - Când se poate</SelectItem>
+                            <SelectItem value="medium">Medie - Săptămâna aceasta</SelectItem>
+                            <SelectItem value="high">Ridicată - URGENT</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="preferred_date">Preferred Date</Label>
+                        <Label htmlFor="preferred_date">Data Preferată</Label>
                         <Input
                           type="date"
                           value={formData.preferred_date}
@@ -501,12 +501,12 @@ export default function RequestService() {
                     </div>
 
                     <div>
-                      <Label>Budget Range (Optional)</Label>
+                      <Label>Intervalul de Buget (Opțional)</Label>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Input
                             type="number"
-                            placeholder="Min $"
+                            placeholder="Min lei"
                             value={formData.budget_min}
                             onChange={(e) => setFormData({ ...formData, budget_min: e.target.value })}
                           />
@@ -514,7 +514,7 @@ export default function RequestService() {
                         <div>
                           <Input
                             type="number"
-                            placeholder="Max $"
+                            placeholder="Max lei"
                             value={formData.budget_max}
                             onChange={(e) => setFormData({ ...formData, budget_max: e.target.value })}
                           />
@@ -523,20 +523,20 @@ export default function RequestService() {
                     </div>
 
                     <div className="space-y-4">
-                      <Label>Location</Label>
+                      <Label>Locația</Label>
                       <Input
-                        placeholder="Street address"
+                        placeholder="Adresa străzii"
                         value={formData.location_address}
                         onChange={(e) => setFormData({ ...formData, location_address: e.target.value })}
                       />
                       <div className="grid grid-cols-2 gap-4">
                         <Input
-                          placeholder="City"
+                          placeholder="Orașul"
                           value={formData.location_city}
                           onChange={(e) => setFormData({ ...formData, location_city: e.target.value })}
                         />
                         <Input
-                          placeholder="State"
+                          placeholder="Județul"
                           value={formData.location_state}
                           onChange={(e) => setFormData({ ...formData, location_state: e.target.value })}
                         />
@@ -544,7 +544,7 @@ export default function RequestService() {
                     </div>
 
                     <Button type="submit" className="w-full" disabled={loading || !formData.car_id || !formData.category_id}>
-                      {loading ? 'Submitting...' : 'Request Service'}
+                      {loading ? 'Se trimite...' : 'Solicită Service'}
                     </Button>
                   </form>
                 </CardContent>

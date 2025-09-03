@@ -49,18 +49,18 @@ export default function Auth() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground">AutoEase</h1>
-          <p className="text-muted-foreground">Connect car owners with trusted garages</p>
+          <p className="text-muted-foreground">Conectează proprietarii de mașini cu service-uri de încredere</p>
         </div>
         
         <Card>
           <CardHeader>
-            <CardTitle>Welcome</CardTitle>
+            <CardTitle>Bine ai venit</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signin">Conectare</TabsTrigger>
+                <TabsTrigger value="signup">Înregistrare</TabsTrigger>
               </TabsList>
               
               <TabsContent value="signin">
@@ -71,12 +71,12 @@ export default function Auth() {
                       id="signin-email"
                       name="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder="email@tau.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
+                    <Label htmlFor="signin-password">Parolă</Label>
                     <Input
                       id="signin-password"
                       name="password"
@@ -86,7 +86,7 @@ export default function Auth() {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? 'Se conectează...' : 'Conectare'}
                   </Button>
                 </form>
               </TabsContent>
@@ -94,12 +94,12 @@ export default function Auth() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
+                    <Label htmlFor="signup-name">Nume Complet</Label>
                     <Input
                       id="signup-name"
                       name="fullName"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Ion Popescu"
                       required
                     />
                   </div>
@@ -109,12 +109,12 @@ export default function Auth() {
                       id="signup-email"
                       name="email"
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder="email@tau.com"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">Parolă</Label>
                     <Input
                       id="signup-password"
                       name="password"
@@ -125,22 +125,22 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="user-type">Account Type</Label>
+                    <Label htmlFor="user-type">Tipul Contului</Label>
                     <Select name="userType" defaultValue="car_owner" required>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select account type" />
+                        <SelectValue placeholder="Selectează tipul contului" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="car_owner">
                           <div className="flex items-center gap-2">
                             <Car className="h-4 w-4" />
-                            Car Owner
+                            Proprietar Mașină
                           </div>
                         </SelectItem>
                         <SelectItem value="garage">
                           <div className="flex items-center gap-2">
                             <Wrench className="h-4 w-4" />
-                            Garage/Mechanic
+                            Service/Mecanic
                           </div>
                         </SelectItem>
                         <SelectItem value="admin">
@@ -153,7 +153,7 @@ export default function Auth() {
                     </Select>
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Creating account...' : 'Create Account'}
+                    {loading ? 'Se creează contul...' : 'Creează Cont'}
                   </Button>
                 </form>
               </TabsContent>

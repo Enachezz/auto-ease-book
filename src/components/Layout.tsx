@@ -38,7 +38,7 @@ export function Layout({ children }: LayoutProps) {
                       size="sm"
                       onClick={() => navigate('/request-service')}
                     >
-                      Request Service
+                      Solicită Service
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -46,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
                       onClick={() => navigate('/my-requests')}
                     >
                       <List className="h-4 w-4 mr-2" />
-                      My Requests
+                      Solicitările Mele
                     </Button>
                     <Button 
                       variant="ghost" 
@@ -54,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
                       onClick={() => navigate('/my-cars')}
                     >
                       <Car className="h-4 w-4 mr-2" />
-                      My Cars
+                      Mașinile Mele
                     </Button>
                   </>
                 )}
@@ -65,7 +65,7 @@ export function Layout({ children }: LayoutProps) {
                     onClick={() => navigate('/garage')}
                   >
                     <Wrench className="h-4 w-4 mr-2" />
-                    Garage Management
+                    Gestionare Service
                   </Button>
                 )}
               </nav>
@@ -78,12 +78,12 @@ export function Layout({ children }: LayoutProps) {
                 <User className="h-4 w-4" />
                 <span className="text-sm font-medium">{profile.full_name}</span>
                 <span className="text-xs text-muted-foreground capitalize">
-                  ({profile.user_type.replace('_', ' ')})
+                  ({profile.user_type.replace('_', ' ') === 'car owner' ? 'proprietar auto' : profile.user_type.replace('_', ' ') === 'garage' ? 'service auto' : 'admin'})
                 </span>
               </div>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                Deconectare
               </Button>
             </div>
           )}

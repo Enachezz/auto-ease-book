@@ -494,21 +494,21 @@ const MyCars = () => {
                           </div>
                           <div className="space-y-4">
                             <div>
-                              <Label className="text-sm font-medium">License Plate</Label>
+                              <Label className="text-sm font-medium">Număr de Înmatriculare</Label>
                               <p className="text-sm text-muted-foreground">
-                                {selectedCar.license_plate || 'Not specified'}
+                                {selectedCar.license_plate || 'Nu este specificat'}
                               </p>
                             </div>
                             <div>
-                              <Label className="text-sm font-medium">Current Mileage</Label>
+                              <Label className="text-sm font-medium">Kilometraj Curent</Label>
                               <p className="text-sm text-muted-foreground">
-                                {selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} miles` : 'Not specified'}
+                                {selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} km` : 'Nu este specificat'}
                               </p>
                             </div>
                             <div>
                               <Label className="text-sm font-medium">VIN</Label>
                               <p className="text-sm text-muted-foreground font-mono">
-                                {selectedCar.vin || 'Not specified'}
+                                {selectedCar.vin || 'Nu este specificat'}
                               </p>
                             </div>
                           </div>
@@ -520,7 +520,7 @@ const MyCars = () => {
                   <TabsContent value="history">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Service History</h3>
+                        <h3 className="text-lg font-semibold">Istoricul Service-ului</h3>
                         <Badge variant="secondary">
                           {serviceHistory.length} service{serviceHistory.length !== 1 ? 's' : ''}
                         </Badge>

@@ -239,14 +239,14 @@ export default function GarageManagement() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <Button variant="outline" size="sm" onClick={() => navigate('/')} className="self-start sm:self-auto">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Înapoi
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Garage Management</h1>
-            <p className="text-muted-foreground">Manage your garage and handle job requests</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Gestionare Service</h1>
+            <p className="text-sm md:text-base text-muted-foreground">Gestionează service-ul și cererile de lucru</p>
           </div>
         </div>
 
@@ -264,11 +264,11 @@ export default function GarageManagement() {
           </Card>
         )}
 
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="jobs">Available Jobs</TabsTrigger>
-            <TabsTrigger value="quotes">My Quotes</TabsTrigger>
+        <Tabs defaultValue="profile" className="space-y-4 md:space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile" className="text-xs md:text-sm">Profil</TabsTrigger>
+            <TabsTrigger value="jobs" className="text-xs md:text-sm">Locuri de muncă</TabsTrigger>
+            <TabsTrigger value="quotes" className="text-xs md:text-sm">Ofertele mele</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">

@@ -183,20 +183,21 @@ export default function JobRequests() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <Button variant="outline" size="sm" onClick={() => navigate('/')} className="self-start sm:self-auto">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
+              Înapoi
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">My Service Requests</h1>
-              <p className="text-muted-foreground">Manage your job requests and view quotes</p>
+              <h1 className="text-2xl md:text-3xl font-bold">Cererile Mele de Serviciu</h1>
+              <p className="text-sm md:text-base text-muted-foreground">Gestionează cererile și vezi ofertele</p>
             </div>
           </div>
-          <Button onClick={() => navigate('/request-service')}>
+          <Button onClick={() => navigate('/request-service')} className="self-start sm:self-auto">
             <Plus className="h-4 w-4 mr-2" />
-            New Request
+            <span className="hidden sm:inline">Cerere Nouă</span>
+            <span className="sm:hidden">Nouă</span>
           </Button>
         </div>
 
@@ -253,9 +254,9 @@ export default function JobRequests() {
                         View Quotes
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto mx-4">
                       <DialogHeader>
-                        <DialogTitle>Quotes for: {selectedJob?.title}</DialogTitle>
+                        <DialogTitle className="text-base md:text-lg">Oferte pentru: {selectedJob?.title}</DialogTitle>
                       </DialogHeader>
                       
                       <div className="space-y-4">

@@ -195,6 +195,7 @@ const MyCars = () => {
   };
 
   const fetchCarModels = async (makeId: string) => {
+    console.log('Fetching car models for makeId:', makeId);
     try {
       const { data, error } = await supabase
         .from('car_models')
@@ -202,10 +203,15 @@ const MyCars = () => {
         .eq('make_id', makeId)
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching car models:', error);
+        throw error;
+      }
+      console.log('Fetched car models:', data);
       setCarModels(data || []);
     } catch (error) {
       console.error('Error fetching car models:', error);
+      setCarModels([]); // Ensure models are cleared on error
     }
   };
 

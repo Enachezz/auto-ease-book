@@ -173,7 +173,7 @@ export default function RequestService() {
     (category.description && category.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const popularServices = ['Oil Change', 'Brake Service', 'Tire Service', 'Engine Repair'];
+  const popularServices = ['Schimb Ulei', 'Service Frâne', 'Service Anvelope', 'Reparații Motor'];
   const popularCategories = categories.filter(cat => popularServices.includes(cat.name));
   const otherCategories = categories.filter(cat => !popularServices.includes(cat.name));
 
@@ -235,8 +235,20 @@ export default function RequestService() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 h-12 text-lg"
-              />
+            />
+            
+            {/* Alte optiuni button */}
+            <div className="text-center">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/all-repairs')}
+                className="w-full md:w-auto"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Alte opțiuni
+              </Button>
             </div>
+          </div>
 
             {!searchTerm && (
               <>

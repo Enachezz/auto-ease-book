@@ -472,16 +472,31 @@ const MyCars = () => {
             <h1 className="text-3xl font-bold">My Cars</h1>
             <p className="text-muted-foreground">Manage your vehicles and view service history</p>
           </div>
-          <Dialog open={isAddingCar} onOpenChange={setIsAddingCar}>
+          <Dialog open={isAddingCar} onOpenChange={(open) => {
+            setIsAddingCar(open);
+            if (open) {
+              // Reset form and models when dialog opens
+              setNewCar({
+                make_id: '',
+                model_id: '',
+                year: new Date().getFullYear(),
+                color: '',
+                mileage: '',
+                license_plate: '',
+                vin: ''
+              });
+              setCarModels([]); // Clear models when dialog opens
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
-                Add Car
+                Adaugă Mașină
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Add New Car</DialogTitle>
+                <DialogTitle>Adaugă Mașină Nouă</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

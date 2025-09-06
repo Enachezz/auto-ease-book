@@ -49,8 +49,7 @@ const RequestService = () => {
     : allCategories;
 
   const handleCategorySelect = (categoryName: string) => {
-    // For now, just show a placeholder - future implementation would continue to details form
-    console.log('Selected category:', categoryName);
+    navigate(`/service-details?service=${encodeURIComponent(categoryName)}`);
   };
 
   return (

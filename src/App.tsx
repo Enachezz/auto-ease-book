@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import RequestService from "./pages/RequestService";
-
+import ServiceDetails from "./pages/ServiceDetails";
 import JobRequests from "./pages/JobRequests";
 import MyCars from "./pages/MyCars";
 import GarageManagement from "./pages/GarageManagement";
@@ -26,7 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/request-service" element={<RequestService />} />
-            
+            <Route path="/service-details" element={<ServiceDetails />} />
             <Route path="/my-requests" element={<JobRequests />} />
             <Route path="/my-cars" element={<MyCars />} />
             <Route path="/garage" element={<GarageManagement />} />

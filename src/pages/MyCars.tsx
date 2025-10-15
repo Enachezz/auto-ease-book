@@ -674,6 +674,14 @@ const MyCars = () => {
                     <TabsTrigger value="documents">Documente</TabsTrigger>
                   </TabsList>
 
+                  <div className="flex justify-center py-6">
+                    <img 
+                      src={carsImage} 
+                      alt="Cars" 
+                      className="w-full max-w-2xl h-auto object-contain"
+                    />
+                  </div>
+
                   <TabsContent value="details">
                     <Card>
                       <CardHeader>
@@ -688,13 +696,6 @@ const MyCars = () => {
                         </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="mb-6 flex justify-center">
-                          <img 
-                            src={carsImage} 
-                            alt="Cars" 
-                            className="w-full max-w-2xl h-auto object-contain rounded-lg"
-                          />
-                        </div>
                         <div className="grid md:grid-cols-2 gap-6">
                           <div className="space-y-4">
                             <div>

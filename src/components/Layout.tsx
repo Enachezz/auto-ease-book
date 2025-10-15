@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, LogOut, User, Wrench, List, Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
+import ecarLogo from '@/assets/ecar-logo.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,8 +34,7 @@ export function Layout({ children }: LayoutProps) {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <Car className="h-6 w-6 text-primary" />
-            <span className="text-lg md:text-xl font-bold">AutoEase</span>
+            <img src={ecarLogo} alt="eCAR" className="h-8 md:h-10" />
           </div>
 
           {/* Desktop Navigation */}

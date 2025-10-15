@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Car, Wrench, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ecarLogo from '@/assets/ecar-logo.png';
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
@@ -79,7 +80,7 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">AutoEase</h1>
+          <img src={ecarLogo} alt="eCAR" className="h-16 mx-auto mb-4" />
           <p className="text-muted-foreground">Conectează proprietarii de mașini cu service-uri de încredere</p>
         </div>
         

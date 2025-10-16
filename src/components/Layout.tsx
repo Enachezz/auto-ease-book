@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Car, LogOut, User, Wrench, List, Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
-import autoeaseLogo from '@/assets/autoease-logo.png';
+import autofixLogo from '@/assets/autofix-logo.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -34,7 +34,7 @@ export function Layout({ children }: LayoutProps) {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <img src={autoeaseLogo} alt="AutoEase" className="h-8 md:h-10" />
+            <img src={autofixLogo} alt="AutoFix" className="h-10 md:h-12 brightness-0 dark:brightness-100" />
           </div>
 
           {/* Desktop Navigation */}

@@ -6,7 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Car, Calendar, MapPin } from 'lucide-react';
+import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const ServiceDetails = () => {
   const navigate = useNavigate();
@@ -15,7 +19,7 @@ const ServiceDetails = () => {
   
   const [formData, setFormData] = useState({
     description: '',
-    preferredDate: '',
+    preferredDate: undefined as Date | undefined,
     location: '',
     urgency: 'normal'
   });
@@ -85,18 +89,35 @@ const ServiceDetails = () => {
 
               {/* Preferred Date */}
               <div className="space-y-2">
-                <Label htmlFor="preferredDate">Data preferată</Label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    id="preferredDate"
-                    type="date"
-                    value={formData.preferredDate}
-                    onChange={(e) => setFormData({ ...formData, preferredDate: e.target.value })}
-                    className="pl-10"
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
+                <Label>Data preferată</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.preferredDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.preferredDate ? (
+                        format(formData.preferredDate, "PPP")
+                      ) : (
+                        <span>Alege o dată</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.preferredDate}
+                      onSelect={(date) => setFormData({ ...formData, preferredDate: date })}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Location */}

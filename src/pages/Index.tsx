@@ -8,6 +8,7 @@ import {
   Wrench, 
   CheckCircle
 } from 'lucide-react';
+import heroBackground from '@/assets/hero-background.jpg';
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -29,21 +30,25 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary/5 to-blue-50 dark:from-primary/10 dark:to-slate-900 rounded-2xl overflow-hidden mb-16">
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000' fill-opacity='0.05'%3E%3Ccircle cx='7' cy='7' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}></div>
+      <div className="relative rounded-2xl overflow-hidden mb-16">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${heroBackground})`
+          }}
+        ></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative px-8 py-16 lg:py-24">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 bg-white/20 text-white backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6">
               <span>🚗</span>
               Alătură-te miilor de clienți satisfăcuți
             </div>
-            <h1 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Găsește service-uri locale pe care te poți{' '}
-              <span className="text-primary">baza</span>
+              <span className="text-white drop-shadow-lg">baza</span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-white mb-8 max-w-2xl mx-auto drop-shadow-md">
               Te ajutăm să economisești bani la reparațiile auto în doar câteva click-uri. 
               Conectează-te cu mecanici de încredere și obține oferte competitive.
             </p>
@@ -107,16 +112,16 @@ const Index = () => {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-white/90">
               <div className="flex items-center gap-2">
                 <div className="flex text-yellow-400">
                   ★★★★★
                 </div>
                 <span>4.8/5 evaluare</span>
               </div>
-              <div className="h-4 w-px bg-border hidden sm:block"></div>
+              <div className="h-4 w-px bg-white/30 hidden sm:block"></div>
               <span>10,000+ clienți mulțumiți</span>
-              <div className="h-4 w-px bg-border hidden sm:block"></div>
+              <div className="h-4 w-px bg-white/30 hidden sm:block"></div>
               <span>500+ service-uri de încredere</span>
             </div>
           </div>

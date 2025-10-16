@@ -131,7 +131,7 @@ const Index = () => {
       {/* How it works */}
       <div className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Cum Funcționează eCAR</h2>
+          <h2 className="text-3xl font-bold mb-4">Cum Funcționează AutoEase</h2>
           <p className="text-lg text-muted-foreground">Pași simpli pentru a-ți repara mașina</p>
         </div>
         
@@ -203,7 +203,7 @@ const Index = () => {
       <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center">
         <h2 className="text-3xl font-bold mb-4">Gata să începi?</h2>
         <p className="text-lg mb-6 opacity-90">
-          Alătură-te miilor de șoferi care au încredere în eCAR pentru reparațiile auto
+          Alătură-te miilor de șoferi care au încredere în AutoEase pentru reparațiile auto
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {!user ? (

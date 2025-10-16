@@ -90,14 +90,14 @@ const ServiceDetails = () => {
               {/* Preferred Date */}
               <div className="space-y-2">
                 <Label>Data preferată</Label>
-                <div className="flex justify-center border rounded-lg p-2">
+                <div className="border rounded-lg p-4">
                   <Calendar
                     mode="single"
                     selected={formData.preferredDate}
                     onSelect={(date) => setFormData({ ...formData, preferredDate: date })}
                     disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                     initialFocus
-                    className={cn("pointer-events-auto")}
+                    className={cn("w-full pointer-events-auto")}
                   />
                 </div>
               </div>

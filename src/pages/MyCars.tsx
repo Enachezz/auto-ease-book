@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,10 @@ import {
   FileText,
   Download,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Camera,
+  Upload,
+  X
 } from 'lucide-react';
 import carsImage from '@/assets/cars.png';
 
@@ -133,11 +136,20 @@ const MyCars = () => {
     location: '',
     notes: ''
   });
-  const [newDocument, setNewDocument] = useState({
+  const [newDocument, setNewDocument] = useState<{
+    type: 'asigurare' | 'rovinieta' | 'itp';
+    title: string;
+    expiry_date: string;
+    notes: string;
+    file_url?: string;
+    file?: File;
+  }>({
     type: 'asigurare' as const,
     title: '',
     expiry_date: '',
-    notes: ''
+    notes: '',
+    file_url: undefined,
+    file: undefined
   });
 
   useEffect(() => {
@@ -326,30 +338,64 @@ const MyCars = () => {
     });
   };
 
-  const handleAddDocument = () => {
-    if (!selectedCar) return;
+  const handleAddDocument = async () => {
+    if (!selectedCar || !user) return;
     
-    const newDoc: CarDocument = {
-      id: Date.now().toString(),
-      type: newDocument.type,
-      title: newDocument.title,
-      expiry_date: newDocument.expiry_date,
-      notes: newDocument.notes || undefined
-    };
+    try {
+      let fileUrl = newDocument.file_url;
+      
+      // Upload file to Supabase Storage if a file was selected
+      if (newDocument.file) {
+        const fileExt = newDocument.file.name.split('.').pop();
+        const fileName = `${user.id}/${selectedCar.id}/${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('car-documents')
+          .upload(fileName, newDocument.file);
 
-    setCarDocuments(prev => [newDoc, ...prev]);
-    setIsAddingDocument(false);
-    setNewDocument({
-      type: 'asigurare',
-      title: '',
-      expiry_date: '',
-      notes: ''
-    });
+        if (uploadError) {
+          throw uploadError;
+        }
 
-    toast({
-      title: "Succes",
-      description: "Documentul a fost adăugat cu succes",
-    });
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('car-documents')
+          .getPublicUrl(fileName);
+        
+        fileUrl = publicUrl;
+      }
+      
+      const newDoc: CarDocument = {
+        id: Date.now().toString(),
+        type: newDocument.type,
+        title: newDocument.title,
+        expiry_date: newDocument.expiry_date,
+        file_url: fileUrl,
+        notes: newDocument.notes || undefined
+      };
+
+      setCarDocuments(prev => [newDoc, ...prev]);
+      setIsAddingDocument(false);
+      setNewDocument({
+        type: 'asigurare',
+        title: '',
+        expiry_date: '',
+        notes: '',
+        file_url: undefined,
+        file: undefined
+      });
+
+      toast({
+        title: "Succes",
+        description: "Documentul a fost adăugat cu succes",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Eroare",
+        description: error.message || "Nu s-a putut încărca documentul",
+        variant: "destructive",
+      });
+    }
   };
 
   const generatePDF = async () => {
@@ -1023,7 +1069,7 @@ const MyCars = () => {
                               Adaugă Document
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-md">
+                          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Adaugă Document</DialogTitle>
                             </DialogHeader>
@@ -1053,6 +1099,89 @@ const MyCars = () => {
                                   placeholder="ex. Asigurare RCA City Insurance"
                                 />
                               </div>
+                              
+                              {/* File Upload Section */}
+                              <div className="space-y-3 border rounded-lg p-4 bg-muted/30">
+                                <Label>Fotografie Document</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <label htmlFor="file-upload" className="cursor-pointer">
+                                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg hover:bg-muted/50 transition-colors">
+                                      <Upload className="h-6 w-6 mb-2 text-muted-foreground" />
+                                      <span className="text-xs text-center text-muted-foreground">
+                                        Încarcă din Galerie
+                                      </span>
+                                    </div>
+                                    <input
+                                      id="file-upload"
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          setNewDocument({ 
+                                            ...newDocument, 
+                                            file_url: URL.createObjectURL(file),
+                                            file: file
+                                          });
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                  
+                                  <label htmlFor="camera-capture" className="cursor-pointer">
+                                    <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-lg hover:bg-muted/50 transition-colors">
+                                      <Camera className="h-6 w-6 mb-2 text-muted-foreground" />
+                                      <span className="text-xs text-center text-muted-foreground">
+                                        Fotografiază
+                                      </span>
+                                    </div>
+                                    <input
+                                      id="camera-capture"
+                                      type="file"
+                                      accept="image/*"
+                                      capture="environment"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          setNewDocument({ 
+                                            ...newDocument, 
+                                            file_url: URL.createObjectURL(file),
+                                            file: file
+                                          });
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+                                
+                                {newDocument.file_url && (
+                                  <div className="relative mt-3">
+                                    <img 
+                                      src={newDocument.file_url} 
+                                      alt="Document preview" 
+                                      className="w-full h-48 object-cover rounded-lg"
+                                    />
+                                    <Button
+                                      variant="destructive"
+                                      size="icon"
+                                      className="absolute top-2 right-2"
+                                      onClick={() => setNewDocument({ 
+                                        ...newDocument, 
+                                        file_url: undefined,
+                                        file: undefined
+                                      })}
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                  Încarcă o fotografie a documentului (opțional)
+                                </p>
+                              </div>
+
                               <div>
                                 <Label htmlFor="expiry">Data Expirare</Label>
                                 <Input
@@ -1104,7 +1233,7 @@ const MyCars = () => {
                                 'border-l-green-500'
                               }`}>
                                 <CardContent className="pt-6">
-                                  <div className="flex justify-between items-start">
+                                  <div className="flex justify-between items-start gap-4">
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 mb-2">
                                         <h4 className="font-semibold">{doc.title}</h4>
@@ -1120,6 +1249,16 @@ const MyCars = () => {
                                         <p className="text-sm text-muted-foreground">
                                           {doc.notes}
                                         </p>
+                                      )}
+                                      {doc.file_url && (
+                                        <div className="mt-3">
+                                          <img 
+                                            src={doc.file_url} 
+                                            alt={doc.title}
+                                            className="w-48 h-32 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => window.open(doc.file_url, '_blank')}
+                                          />
+                                        </div>
                                       )}
                                     </div>
                                     <div className="flex items-center gap-2">

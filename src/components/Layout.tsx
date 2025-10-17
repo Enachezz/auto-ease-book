@@ -1,8 +1,14 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Car, LogOut, User, Wrench, List, Menu, X } from 'lucide-react';
+import { Car, LogOut, User, Wrench, List, Menu, Settings } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import autofixLogo from '@/assets/autofix-logo.png';
 
@@ -83,17 +89,27 @@ export function Layout({ children }: LayoutProps) {
           {/* Desktop User Info & Sign Out */}
           {profile && (
             <div className="hidden md:flex items-center gap-2 lg:gap-4">
-              <div className="hidden lg:flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span className="text-sm font-medium">{profile.full_name}</span>
-                <span className="hidden xl:block text-xs text-muted-foreground capitalize">
-                  ({profile.user_type.replace('_', ' ') === 'car owner' ? 'proprietar auto' : profile.user_type.replace('_', ' ') === 'garage' ? 'service auto' : 'admin'})
-                </span>
-              </div>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 md:mr-2" />
-                <span className="hidden md:inline">Deconectare</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="text-sm font-medium">{profile.full_name}</span>
+                    <span className="hidden xl:block text-xs text-muted-foreground capitalize">
+                      ({profile.user_type.replace('_', ' ') === 'car owner' ? 'proprietar auto' : profile.user_type.replace('_', ' ') === 'garage' ? 'service auto' : 'admin'})
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Setări
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Deconectare
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
 

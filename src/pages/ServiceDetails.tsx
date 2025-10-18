@@ -78,7 +78,7 @@ const ServiceDetails = () => {
   const selectedCar = cars.find(car => car.id === formData.carId);
   const showVinWarning = selectedCar && !selectedCar.vin;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.carId) {
@@ -90,8 +90,67 @@ const ServiceDetails = () => {
       return;
     }
 
-    console.log('Service request submitted:', { service: selectedService, ...formData });
-    navigate('/', { state: { message: 'Cererea ta de service a fost trimisă cu succes!' } });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Eroare",
+          description: "Trebuie să fii autentificat.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Get or create service category
+      let categoryId = null;
+      const { data: categories } = await supabase
+        .from('service_categories')
+        .select('id')
+        .limit(1)
+        .single();
+      
+      categoryId = categories?.id;
+
+      if (!categoryId) {
+        toast({
+          title: "Eroare",
+          description: "Nu s-a putut găsi categoria de service.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Insert job request
+      const { error } = await supabase
+        .from('job_requests')
+        .insert({
+          user_id: user.id,
+          car_id: formData.carId,
+          category_id: categoryId,
+          title: selectedService,
+          description: formData.description,
+          preferred_date: formData.preferredDate?.toISOString().split('T')[0],
+          urgency: formData.urgency,
+          location_address: formData.location,
+          status: 'open'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Cererea ta de service a fost trimisă cu succes!",
+      });
+      
+      navigate('/job-requests');
+    } catch (error) {
+      console.error('Error submitting service request:', error);
+      toast({
+        title: "Eroare",
+        description: "Nu s-a putut trimite cererea. Te rugăm să încerci din nou.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

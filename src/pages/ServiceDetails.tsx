@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -6,29 +6,91 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin } from 'lucide-react';
+import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin, AlertCircle, Plus } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface UserCar {
+  id: string;
+  make_id: string;
+  model_id: string;
+  year: number;
+  vin: string | null;
+  license_plate: string | null;
+  car_makes?: { name: string };
+  car_models?: { name: string };
+}
 
 const ServiceDetails = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const selectedService = searchParams.get('service') || 'Service Auto';
+  const { toast } = useToast();
   
+  const [cars, setCars] = useState<UserCar[]>([]);
+  const [loadingCars, setLoadingCars] = useState(true);
   const [formData, setFormData] = useState({
     description: '',
     preferredDate: undefined as Date | undefined,
     location: '',
-    urgency: 'normal'
+    urgency: 'normal',
+    carId: ''
   });
+
+  useEffect(() => {
+    fetchUserCars();
+  }, []);
+
+  const fetchUserCars = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('cars')
+        .select(`
+          *,
+          car_makes(name),
+          car_models(name)
+        `)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      setCars(data || []);
+    } catch (error) {
+      console.error('Error fetching cars:', error);
+      toast({
+        title: "Eroare",
+        description: "Nu s-au putut încărca mașinile tale.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingCars(false);
+    }
+  };
+
+  const selectedCar = cars.find(car => car.id === formData.carId);
+  const showVinWarning = selectedCar && !selectedCar.vin;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically save the service request and navigate to confirmation
+    
+    if (!formData.carId) {
+      toast({
+        title: "Eroare",
+        description: "Te rugăm să selectezi o mașină.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log('Service request submitted:', { service: selectedService, ...formData });
-    // For now, navigate back to home with success message
     navigate('/', { state: { message: 'Cererea ta de service a fost trimisă cu succes!' } });
   };
 
@@ -74,6 +136,75 @@ const ServiceDetails = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Car Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="car">Selectează mașina *</Label>
+                {loadingCars ? (
+                  <div className="text-sm text-muted-foreground">Se încarcă mașinile...</div>
+                ) : cars.length === 0 ? (
+                  <div className="space-y-3">
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Nu ai nicio mașină adăugată. Adaugă o mașină pentru a putea solicita service.
+                      </AlertDescription>
+                    </Alert>
+                    <Button
+                      type="button"
+                      onClick={() => navigate('/my-cars')}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adaugă Mașină
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Select
+                      value={formData.carId}
+                      onValueChange={(value) => setFormData({ ...formData, carId: value })}
+                      required
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Alege mașina" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cars.map((car) => (
+                          <SelectItem key={car.id} value={car.id}>
+                            {car.car_makes?.name} {car.car_models?.name} ({car.year})
+                            {car.license_plate && ` - ${car.license_plate}`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {showVinWarning && (
+                      <Alert className="mt-3">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="space-y-2">
+                          <p className="text-sm">
+                            Mașina selectată nu are numărul de șasiu (VIN) adăugat. 
+                            Adăugarea VIN-ului ajută mecanicul să găsească piesele mai rapid.
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Nu-ți face griji! Numărul de șasiu va ajunge la mecanic doar după confirmarea lucrării.
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate('/my-cars')}
+                            className="mt-2"
+                          >
+                            Adaugă VIN acum
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </>
+                )}
+              </div>
+
               {/* Description */}
               <div className="space-y-2">
                 <Label htmlFor="description">Descrierea problemei *</Label>

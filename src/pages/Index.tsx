@@ -40,13 +40,15 @@ const Index = () => {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative px-8 py-16 lg:py-24">
           <div className="max-w-4xl mx-auto text-center">
-            <div 
-              className="inline-flex items-center gap-2 bg-white/20 text-white backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6 cursor-pointer hover:bg-white/30 transition-colors"
-              onClick={() => navigate('/auth')}
-            >
-              <span>🚗</span>
-              Alătură-te miilor de clienți satisfăcuți
-            </div>
+            {!user && (
+              <div 
+                className="inline-flex items-center gap-2 bg-white/20 text-white backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6 cursor-pointer hover:bg-white/30 transition-colors"
+                onClick={() => navigate('/auth')}
+              >
+                <span>🚗</span>
+                Alătură-te miilor de clienți satisfăcuți
+              </div>
+            )}
             <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Găsește service-uri locale pe care te poți{' '}
               <span className="text-white drop-shadow-lg">baza</span>

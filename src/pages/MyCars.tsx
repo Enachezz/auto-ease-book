@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -106,6 +107,7 @@ interface CarModel {
 const MyCars = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
   const [cars, setCars] = useState<Car[]>([]);
   const [serviceHistory, setServiceHistory] = useState<ServiceHistory[]>([]);
   const [manualHistory, setManualHistory] = useState<ManualHistoryEntry[]>([]);
@@ -115,6 +117,7 @@ const MyCars = () => {
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAddingCar, setIsAddingCar] = useState(false);
+  const [isEditingCar, setIsEditingCar] = useState(false);
   const [isAddingHistory, setIsAddingHistory] = useState(false);
   const [isAddingDocument, setIsAddingDocument] = useState(false);
   const [newCar, setNewCar] = useState({
@@ -164,6 +167,18 @@ const MyCars = () => {
       fetchServiceHistory(selectedCar.id);
     }
   }, [selectedCar]);
+
+  useEffect(() => {
+    // Check if we need to open edit dialog for a specific car
+    const state = location.state as { editCarId?: string };
+    if (state?.editCarId && cars.length > 0) {
+      const carToEdit = cars.find(car => car.id === state.editCarId);
+      if (carToEdit) {
+        setSelectedCar(carToEdit);
+        setIsEditingCar(true);
+      }
+    }
+  }, [location.state, cars]);
 
   const fetchCars = async () => {
     try {
@@ -735,10 +750,169 @@ const MyCars = () => {
                           <CardTitle>
                             {selectedCar.car_makes?.name} {selectedCar.car_models?.name} ({selectedCar.year})
                           </CardTitle>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit
-                          </Button>
+                          <Dialog open={isEditingCar} onOpenChange={(open) => {
+                            setIsEditingCar(open);
+                            if (open && selectedCar) {
+                              setNewCar({
+                                make_id: selectedCar.make_id,
+                                model_id: selectedCar.model_id,
+                                year: selectedCar.year,
+                                color: selectedCar.color || '',
+                                license_plate: selectedCar.license_plate || '',
+                                mileage: selectedCar.mileage?.toString() || '',
+                                vin: selectedCar.vin || ''
+                              });
+                              fetchCarModels(selectedCar.make_id);
+                            }
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Editează Mașina</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label htmlFor="edit-make">Make</Label>
+                                  <Select 
+                                    value={newCar.make_id} 
+                                    onValueChange={(value) => {
+                                      setNewCar({ ...newCar, make_id: value, model_id: '' });
+                                      fetchCarModels(value);
+                                    }}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select make" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {carMakes.map((make) => (
+                                        <SelectItem key={make.id} value={make.id}>
+                                          {make.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-model">Model</Label>
+                                  <Select 
+                                    value={newCar.model_id} 
+                                    onValueChange={(value) => setNewCar({ ...newCar, model_id: value })}
+                                    disabled={!newCar.make_id}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select model" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {carModels.map((model) => (
+                                        <SelectItem key={model.id} value={model.id}>
+                                          {model.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-year">Year</Label>
+                                  <Input
+                                    id="edit-year"
+                                    type="number"
+                                    value={newCar.year}
+                                    onChange={(e) => setNewCar({ ...newCar, year: parseInt(e.target.value) })}
+                                    min="1900"
+                                    max={new Date().getFullYear() + 1}
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-color">Color (Optional)</Label>
+                                  <Input
+                                    id="edit-color"
+                                    value={newCar.color}
+                                    onChange={(e) => setNewCar({ ...newCar, color: e.target.value })}
+                                    placeholder="e.g. Red, Blue, White"
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-license_plate">Număr de Înmatriculare (Optional)</Label>
+                                  <Input
+                                    id="edit-license_plate"
+                                    value={newCar.license_plate}
+                                    onChange={(e) => setNewCar({ ...newCar, license_plate: e.target.value })}
+                                    placeholder="e.g. ABC-123"
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-mileage">Kilometraj Curent (Optional)</Label>
+                                  <Input
+                                    id="edit-mileage"
+                                    type="number"
+                                    value={newCar.mileage}
+                                    onChange={(e) => setNewCar({ ...newCar, mileage: e.target.value })}
+                                    placeholder="e.g. 50000"
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="edit-vin">VIN (Optional)</Label>
+                                  <Input
+                                    id="edit-vin"
+                                    value={newCar.vin}
+                                    onChange={(e) => setNewCar({ ...newCar, vin: e.target.value })}
+                                    placeholder="17-character VIN"
+                                    maxLength={17}
+                                  />
+                                </div>
+
+                                <Button 
+                                  onClick={async () => {
+                                    try {
+                                      const { error } = await supabase
+                                        .from('cars')
+                                        .update({
+                                          make_id: newCar.make_id,
+                                          model_id: newCar.model_id,
+                                          year: newCar.year,
+                                          color: newCar.color || null,
+                                          license_plate: newCar.license_plate || null,
+                                          mileage: newCar.mileage ? parseInt(newCar.mileage) : null,
+                                          vin: newCar.vin || null
+                                        })
+                                        .eq('id', selectedCar?.id);
+
+                                      if (error) throw error;
+
+                                      toast({
+                                        title: "Succes",
+                                        description: "Mașina a fost actualizată cu succes",
+                                      });
+
+                                      setIsEditingCar(false);
+                                      fetchCars();
+                                    } catch (error) {
+                                      toast({
+                                        title: "Eroare",
+                                        description: "Nu s-a putut actualiza mașina",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }} 
+                                  className="w-full"
+                                  disabled={!newCar.make_id || !newCar.model_id}
+                                >
+                                  Salvează Modificările
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </CardHeader>
                       <CardContent>

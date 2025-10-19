@@ -252,7 +252,7 @@ const ServiceDetails = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate('/my-cars')}
+                            onClick={() => navigate('/my-cars', { state: { editCarId: formData.carId } })}
                             className="mt-2"
                           >
                             Adaugă VIN acum

@@ -420,61 +420,189 @@ const MyCars = () => {
       const jsPDF = (await import('jspdf')).default;
       const doc = new jsPDF();
 
-      // Title
-      doc.setFontSize(20);
-      doc.text('Raport Istoric Vehicul', 20, 20);
+      // Load logo
+      const logoImg = new Image();
+      logoImg.src = '/src/assets/autofix-logo-pdf.png';
+      
+      await new Promise((resolve) => {
+        logoImg.onload = resolve;
+      });
 
-      // Car details
-      doc.setFontSize(14);
-      doc.text('Detalii Vehicul:', 20, 40);
-      doc.setFontSize(12);
-      doc.text(`Marca: ${selectedCar.car_makes?.name}`, 20, 50);
-      doc.text(`Model: ${selectedCar.car_models?.name}`, 20, 60);
-      doc.text(`An: ${selectedCar.year}`, 20, 70);
-      doc.text(`VIN: ${selectedCar.vin || 'Nu este specificat'}`, 20, 80);
-      doc.text(`Număr înmatriculare: ${selectedCar.license_plate || 'Nu este specificat'}`, 20, 90);
-      doc.text(`Kilometraj: ${selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} km` : 'Nu este specificat'}`, 20, 100);
+      const totalPages = Math.ceil((serviceHistory.length + manualHistory.length) / 10) + 1;
 
-      let yPosition = 120;
+      const addPageElements = (pageNum: number) => {
+        // Add logo in bottom right corner
+        const logoWidth = 35;
+        const logoHeight = 10;
+        doc.addImage(logoImg, 'PNG', 160, 280, logoWidth, logoHeight);
+        
+        // Add page number at bottom center
+        doc.setFontSize(9);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Pagina ${pageNum} din ${totalPages}`, 105, 290, { align: 'center' });
+        doc.setTextColor(0, 0, 0);
+      };
 
-      // Service history
+      // Header with decorative line
+      doc.setFillColor(41, 128, 185);
+      doc.rect(0, 0, 210, 35, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RAPORT ISTORIC VEHICUL', 105, 15, { align: 'center' });
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generat: ${new Date().toLocaleDateString('ro-RO')}`, 105, 25, { align: 'center' });
+      
+      doc.setTextColor(0, 0, 0);
+
+      // Car details section with background
+      doc.setFillColor(240, 240, 240);
+      doc.roundedRect(15, 45, 180, 55, 3, 3, 'F');
+      
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text('Detalii Vehicul', 20, 55);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Marca:', 20, 65);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.car_makes?.name}`, 55, 65);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Model:', 20, 73);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.car_models?.name}`, 55, 73);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('An fabricație:', 20, 81);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.year}`, 55, 81);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('VIN:', 110, 65);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.vin || 'Nu este specificat'}`, 125, 65);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Nr. înmatriculare:', 110, 73);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.license_plate || 'Nu este specificat'}`, 150, 73);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text('Kilometraj:', 110, 81);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} km` : 'Nu este specificat'}`, 137, 81);
+
+      let yPosition = 115;
+      let pageNum = 1;
+
+      // Service history section
       if (serviceHistory.length > 0) {
         doc.setFontSize(14);
-        doc.text('Istoric Service (Platform):', 20, yPosition);
-        yPosition += 10;
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(41, 128, 185);
+        doc.text('Istoric Service (Platformă)', 20, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += 8;
+        
+        doc.setDrawColor(41, 128, 185);
+        doc.setLineWidth(0.5);
+        doc.line(20, yPosition, 190, yPosition);
+        yPosition += 8;
 
-        serviceHistory.forEach((service) => {
-          doc.setFontSize(10);
-          doc.text(`• ${service.title} - ${new Date(service.created_at).toLocaleDateString()}`, 25, yPosition);
-          yPosition += 10;
-          if (yPosition > 280) {
+        serviceHistory.forEach((service, index) => {
+          if (yPosition > 265) {
+            addPageElements(pageNum);
             doc.addPage();
+            pageNum++;
             yPosition = 20;
           }
+
+          doc.setFillColor(250, 250, 250);
+          doc.roundedRect(20, yPosition - 5, 170, 15, 2, 2, 'F');
+          
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${index + 1}. ${service.title}`, 25, yPosition);
+          
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 100, 100);
+          doc.text(`Data: ${new Date(service.created_at).toLocaleDateString('ro-RO')} | Status: ${service.status}`, 25, yPosition + 7);
+          doc.setTextColor(0, 0, 0);
+          
+          yPosition += 20;
         });
       }
 
-      // Manual history
+      // Manual history section
       if (manualHistory.length > 0) {
-        yPosition += 10;
-        doc.setFontSize(14);
-        doc.text('Istoric Manual:', 20, yPosition);
-        yPosition += 10;
-
-        manualHistory.forEach((entry) => {
-          doc.setFontSize(10);
-          doc.text(`• ${entry.title} - ${new Date(entry.date).toLocaleDateString()}`, 25, yPosition);
-          if (entry.cost) {
-            doc.text(`Cost: ${entry.cost} RON`, 25, yPosition + 5);
-            yPosition += 5;
-          }
+        if (yPosition > 240) {
+          addPageElements(pageNum);
+          doc.addPage();
+          pageNum++;
+          yPosition = 20;
+        } else {
           yPosition += 10;
-          if (yPosition > 280) {
+        }
+
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(41, 128, 185);
+        doc.text('Istoric Manual', 20, yPosition);
+        doc.setTextColor(0, 0, 0);
+        yPosition += 8;
+        
+        doc.setDrawColor(41, 128, 185);
+        doc.setLineWidth(0.5);
+        doc.line(20, yPosition, 190, yPosition);
+        yPosition += 8;
+
+        manualHistory.forEach((entry, index) => {
+          if (yPosition > 265) {
+            addPageElements(pageNum);
             doc.addPage();
+            pageNum++;
             yPosition = 20;
           }
+
+          const entryHeight = entry.cost ? 20 : 15;
+          doc.setFillColor(250, 250, 250);
+          doc.roundedRect(20, yPosition - 5, 170, entryHeight, 2, 2, 'F');
+          
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`${index + 1}. ${entry.title}`, 25, yPosition);
+          
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(100, 100, 100);
+          let detailsText = `Data: ${new Date(entry.date).toLocaleDateString('ro-RO')}`;
+          if (entry.mileage) detailsText += ` | Km: ${entry.mileage.toLocaleString()}`;
+          if (entry.location) detailsText += ` | Loc: ${entry.location}`;
+          doc.text(detailsText, 25, yPosition + 7);
+          
+          if (entry.cost) {
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(41, 128, 185);
+            doc.text(`Cost: ${entry.cost} RON`, 25, yPosition + 13);
+          }
+          
+          doc.setTextColor(0, 0, 0);
+          yPosition += entryHeight + 5;
         });
       }
+
+      // Add page elements to last page
+      addPageElements(pageNum);
 
       doc.save(`istoric-vehicul-${selectedCar.license_plate || selectedCar.id}.pdf`);
       

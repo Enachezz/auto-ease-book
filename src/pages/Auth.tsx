@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -80,7 +80,9 @@ export default function Auth() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={autofixLogo} alt="AutoFix" className="h-16 mx-auto mb-4 brightness-0 dark:brightness-100" />
+          <Link to="/">
+            <img src={autofixLogo} alt="AutoFix" className="h-16 mx-auto mb-4 brightness-0 dark:brightness-100 cursor-pointer hover:opacity-80 transition-opacity" />
+          </Link>
           <p className="text-muted-foreground">Conectează proprietarii de mașini cu service-uri de încredere</p>
         </div>
         

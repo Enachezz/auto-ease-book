@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin, AlertCircle, Plus } from 'lucide-react';
+import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin, AlertCircle, Plus, LogIn } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserCar {
   id: string;
@@ -32,6 +33,7 @@ const ServiceDetails = () => {
   const [searchParams] = useSearchParams();
   const selectedService = searchParams.get('service') || 'Service Auto';
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const [cars, setCars] = useState<UserCar[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
@@ -49,8 +51,10 @@ const ServiceDetails = () => {
 
   const fetchUserCars = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setLoadingCars(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('cars')
@@ -200,6 +204,23 @@ const ServiceDetails = () => {
                 <Label htmlFor="car">Selectează mașina *</Label>
                 {loadingCars ? (
                   <div className="text-sm text-muted-foreground">Se încarcă mașinile...</div>
+                ) : !user ? (
+                  <div className="space-y-3">
+                    <Alert>
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        Pentru a trimite o cerere de service, trebuie să ai un cont AutoFix.
+                      </AlertDescription>
+                    </Alert>
+                    <Button
+                      type="button"
+                      onClick={() => navigate('/auth')}
+                      className="w-full"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Conectează-te sau Creează Cont
+                    </Button>
+                  </div>
                 ) : cars.length === 0 ? (
                   <div className="space-y-3">
                     <Alert>

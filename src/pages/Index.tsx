@@ -9,6 +9,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import heroBackground from '@/assets/hero-background.jpg';
+import autofixLogo from '@/assets/autofix-logo.png';
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -205,7 +206,7 @@ const Index = () => {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center">
+      <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center mb-16">
         <h2 className="text-3xl font-bold mb-4">Gata să începi?</h2>
         <p className="text-lg mb-6 opacity-90">
           Alătură-te miilor de șoferi care au încredere în AutoFix pentru reparațiile auto
@@ -238,6 +239,142 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      {/* Garage CTA Section */}
+      <div className="bg-accent text-accent-foreground rounded-2xl p-8 mb-16">
+        <div className="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div>
+            <h2 className="text-2xl lg:text-3xl font-bold mb-3">Ai un service auto?</h2>
+            <p className="text-lg mb-2">
+              Fie că ai un service auto sau ești mecanic mobil, începe astăzi și obține acces instant la mii de clienți potențiali.
+            </p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Button 
+              size="lg"
+              onClick={() => navigate('/auth')}
+              className="whitespace-nowrap"
+            >
+              Începe Astăzi
+            </Button>
+            <span className="text-sm opacity-80">Gratuit - fără plată necesară</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t pt-12 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          {/* Company */}
+          <div>
+            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Companie</h3>
+            <ul className="space-y-3">
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Ajutor</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Ghiduri și Noutăți</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Contact</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Despre Noi</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Recenzii</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Cariere</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* For Garages */}
+          <div>
+            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Pentru Service-uri</h3>
+            <ul className="space-y-3">
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Pentru Service-uri</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Evaluare Service</a>
+              </li>
+              <li>
+                <button onClick={() => navigate('/auth')} className="text-sm hover:text-primary transition-colors text-left">Conectare</button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Legal</h3>
+            <ul className="space-y-3">
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Politica de Confidențialitate</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Termeni și Condiții</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Cod de Conduită</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Politica Cookie-uri</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Social */}
+          <div>
+            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Social</h3>
+            <ul className="space-y-3">
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Facebook</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">Instagram</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">LinkedIn</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">TikTok</a>
+              </li>
+              <li>
+                <a href="#" className="text-sm hover:text-primary transition-colors">YouTube</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Footer */}
+        <div className="pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <img src={autofixLogo} alt="AutoFix" className="h-8 brightness-0 dark:brightness-100" />
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium">AutoFix</p>
+              <p>Economisește mai mult. Stres mai puțin.</p>
+              <p>Viitorul reparațiilor auto începe astăzi.</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/auth')}
+            >
+              Conectare
+            </Button>
+            <Button 
+              size="sm"
+              onClick={() => navigate('/auth')}
+            >
+              Înregistrare
+            </Button>
+          </div>
+        </div>
+      </footer>
     </Layout>
   );
 };

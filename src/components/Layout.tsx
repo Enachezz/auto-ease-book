@@ -86,8 +86,8 @@ export function Layout({ children }: LayoutProps) {
             </nav>
           )}
 
-          {/* Desktop User Info & Sign Out */}
-          {profile && (
+          {/* Desktop User Info & Sign Out / Auth Buttons */}
+          {profile ? (
             <div className="hidden md:flex items-center gap-2 lg:gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -111,10 +111,26 @@ export function Layout({ children }: LayoutProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+          ) : (
+            <div className="hidden md:flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/auth')}
+              >
+                Conectare
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => navigate('/auth')}
+              >
+                Înregistrare
+              </Button>
+            </div>
           )}
 
-          {/* Mobile Menu */}
-          {profile && (
+          {/* Mobile Menu / Auth Buttons */}
+          {profile ? (
             <div className="flex md:hidden items-center gap-2">
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
@@ -186,6 +202,22 @@ export function Layout({ children }: LayoutProps) {
                   </div>
                 </SheetContent>
               </Sheet>
+            </div>
+          ) : (
+            <div className="flex md:hidden items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/auth')}
+              >
+                Conectare
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => navigate('/auth')}
+              >
+                Înregistrare
+              </Button>
             </div>
           )}
         </div>

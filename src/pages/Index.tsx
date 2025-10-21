@@ -64,9 +64,9 @@ const Index = () => {
                   <Button 
                     size="lg" 
                     className="text-lg px-8 py-6 h-auto"
-                    onClick={() => navigate('/auth')}
+                    onClick={() => navigate('/request-service')}
                   >
-                    Începe Gratuit
+                    Vezi Servicii
                   </Button>
                   <Button 
                     variant="outline" 
@@ -74,7 +74,7 @@ const Index = () => {
                     className="text-lg px-8 py-6 h-auto"
                     onClick={() => navigate('/auth')}
                   >
-                    Pentru Service-uri
+                    Începe Gratuit
                   </Button>
                 </>
               ) : profile?.user_type === 'car_owner' ? (

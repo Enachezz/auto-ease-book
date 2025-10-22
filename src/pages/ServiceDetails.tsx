@@ -41,7 +41,7 @@ const ServiceDetails = () => {
     description: '',
     preferredDate: undefined as Date | undefined,
     location: '',
-    urgency: 'normal',
+    urgency: 'medium',
     carId: ''
   });
 
@@ -334,7 +334,7 @@ const ServiceDetails = () => {
                 <div className="flex gap-4">
                   {[
                     { value: 'low', label: 'Nu e urgent', color: 'bg-green-100 text-green-800 border-green-300' },
-                    { value: 'normal', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+                    { value: 'medium', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
                     { value: 'high', label: 'Urgent', color: 'bg-red-100 text-red-800 border-red-300' }
                   ].map((urgency) => (
                     <button

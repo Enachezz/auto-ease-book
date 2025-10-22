@@ -146,7 +146,7 @@ const ServiceDetails = () => {
         description: "Cererea ta de service a fost trimisă cu succes!",
       });
       
-      navigate('/job-requests');
+      navigate('/my-requests');
     } catch (error) {
       console.error('Error submitting service request:', error);
       toast({

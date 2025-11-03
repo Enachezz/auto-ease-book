@@ -11,7 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, MapPin, Calendar, Clock, DollarSign, Car, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, MapPin, Calendar, Clock, DollarSign, Car, Eye, Trash2, Edit, MoreVertical } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface JobRequest {
   id: string;
@@ -53,6 +55,8 @@ export default function JobRequests() {
   const [jobRequests, setJobRequests] = useState<JobRequest[]>([]);
   const [selectedJob, setSelectedJob] = useState<JobRequest | null>(null);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchJobRequests();
@@ -180,6 +184,41 @@ export default function JobRequests() {
     }
   };
 
+  const handleDeleteRequest = async () => {
+    if (!jobToDelete) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('job_requests')
+        .delete()
+        .eq('id', jobToDelete);
+
+      if (error) throw error;
+
+      toast({
+        title: "Succes",
+        description: "Cererea a fost ștearsă"
+      });
+
+      fetchJobRequests();
+      setDeleteDialogOpen(false);
+      setJobToDelete(null);
+    } catch (error: any) {
+      toast({
+        title: "Eroare",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditRequest = (jobId: string) => {
+    navigate(`/edit-request/${jobId}`);
+  };
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -206,7 +245,7 @@ export default function JobRequests() {
             <Card key={job.id}>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-lg font-medium">{job.title}</h3>
                     <p className="text-sm text-muted-foreground flex items-center mt-1">
                       <MapPin className="h-3 w-3 mr-1" />
@@ -216,19 +255,47 @@ export default function JobRequests() {
                       Requested {new Date(job.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    <div className="flex gap-2">
-                      <Badge variant={getUrgencyColor(job.urgency)}>
-                        {job.urgency} priority
-                      </Badge>
-                      <Badge variant={getStatusColor(job.status)}>
-                        {job.status}
-                      </Badge>
+                  <div className="flex items-start gap-2">
+                    <div className="flex flex-col gap-2 items-end">
+                      <div className="flex gap-2">
+                        <Badge variant={getUrgencyColor(job.urgency)}>
+                          {job.urgency} priority
+                        </Badge>
+                        <Badge variant={getStatusColor(job.status)}>
+                          {job.status}
+                        </Badge>
+                      </div>
+                      {job.budget_min && job.budget_max && (
+                        <p className="text-sm text-muted-foreground">
+                          Budget: ${job.budget_min} - ${job.budget_max}
+                        </p>
+                      )}
                     </div>
-                    {job.budget_min && job.budget_max && (
-                      <p className="text-sm text-muted-foreground">
-                        Budget: ${job.budget_min} - ${job.budget_max}
-                      </p>
+                    
+                    {job.status === 'open' && (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditRequest(job.id)}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Modifică
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => {
+                              setJobToDelete(job.id);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Șterge
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   </div>
                 </div>
@@ -362,6 +429,28 @@ export default function JobRequests() {
             </Card>
           )}
         </div>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Ești sigur că vrei să ștergi această cerere?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Această acțiune nu poate fi anulată. Cererea și toate ofertele asociate vor fi șterse permanent.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => {
+                setDeleteDialogOpen(false);
+                setJobToDelete(null);
+              }}>
+                Anulează
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteRequest} disabled={loading}>
+                Șterge
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

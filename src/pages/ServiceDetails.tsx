@@ -11,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +38,7 @@ const ServiceDetails = () => {
   
   const [cars, setCars] = useState<UserCar[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     description: '',
     preferredDate: undefined as Date | undefined,
@@ -122,6 +124,26 @@ const ServiceDetails = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // Check for duplicate requests with same car, category, and date
+      if (formData.preferredDate) {
+        const preferredDateStr = formData.preferredDate.toISOString().split('T')[0];
+        const { data: existingRequests, error: checkError } = await supabase
+          .from('job_requests')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('car_id', formData.carId)
+          .eq('category_id', categoryId)
+          .eq('preferred_date', preferredDateStr)
+          .eq('status', 'open');
+
+        if (checkError) throw checkError;
+
+        if (existingRequests && existingRequests.length > 0) {
+          setDuplicateDialogOpen(true);
+          return;
+        }
       }
 
       // Insert job request
@@ -370,6 +392,26 @@ const ServiceDetails = () => {
             </form>
           </CardContent>
         </Card>
+
+        <AlertDialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cerere Existentă</AlertDialogTitle>
+              <AlertDialogDescription>
+                Ai deja o cerere deschisă pentru aceeași mașină, același serviciu și aceeași dată. 
+                Te rugăm să verifici cererile tale existente.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => {
+                setDuplicateDialogOpen(false);
+                navigate('/my-requests');
+              }}>
+                Vezi Cererile Mele
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );

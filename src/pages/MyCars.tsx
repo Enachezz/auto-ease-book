@@ -94,6 +94,12 @@ interface CarDocument {
   notes?: string;
 }
 
+interface CarVerticalReport {
+  id: string;
+  file_url: string;
+  uploaded_at: string;
+}
+
 interface CarMake {
   id: string;
   name: string;
@@ -113,6 +119,7 @@ const MyCars = () => {
   const [serviceHistory, setServiceHistory] = useState<ServiceHistory[]>([]);
   const [manualHistory, setManualHistory] = useState<ManualHistoryEntry[]>([]);
   const [carDocuments, setCarDocuments] = useState<CarDocument[]>([]);
+  const [carVerticalReports, setCarVerticalReports] = useState<CarVerticalReport[]>([]);
   const [carMakes, setCarMakes] = useState<CarMake[]>([]);
   const [carModels, setCarModels] = useState<CarModel[]>([]);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
@@ -121,6 +128,9 @@ const MyCars = () => {
   const [isEditingCar, setIsEditingCar] = useState(false);
   const [isAddingHistory, setIsAddingHistory] = useState(false);
   const [isAddingDocument, setIsAddingDocument] = useState(false);
+  const [isCarVerticalDialogOpen, setIsCarVerticalDialogOpen] = useState(false);
+  const [hasCarVerticalReport, setHasCarVerticalReport] = useState<boolean | null>(null);
+  const [carVerticalFile, setCarVerticalFile] = useState<File | null>(null);
   const [newCar, setNewCar] = useState({
     make_id: '',
     model_id: '',
@@ -409,6 +419,50 @@ const MyCars = () => {
       toast({
         title: "Eroare",
         description: error.message || "Nu s-a putut încărca documentul",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUploadCarVerticalReport = async () => {
+    if (!selectedCar || !user || !carVerticalFile) return;
+    
+    try {
+      const fileExt = carVerticalFile.name.split('.').pop();
+      const fileName = `${user.id}/${selectedCar.id}/carvertical-${Date.now()}.${fileExt}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('car-documents')
+        .upload(fileName, carVerticalFile);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('car-documents')
+        .getPublicUrl(fileName);
+      
+      const newReport: CarVerticalReport = {
+        id: Date.now().toString(),
+        file_url: publicUrl,
+        uploaded_at: new Date().toISOString()
+      };
+
+      setCarVerticalReports(prev => [newReport, ...prev]);
+      setIsCarVerticalDialogOpen(false);
+      setHasCarVerticalReport(null);
+      setCarVerticalFile(null);
+
+      toast({
+        title: "Succes",
+        description: "Raportul CarVertical a fost încărcat cu succes",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Eroare",
+        description: error.message || "Nu s-a putut încărca raportul",
         variant: "destructive",
       });
     }
@@ -1286,15 +1340,118 @@ const MyCars = () => {
                               </div>
                             </DialogContent>
                           </Dialog>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => window.open(`https://www.carvertical.ro/?vin=${selectedCar.vin || ''}`, '_blank')}
-                            disabled={!selectedCar.vin}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Raport CarVertical
-                          </Button>
+                          <Dialog open={isCarVerticalDialogOpen} onOpenChange={(open) => {
+                            setIsCarVerticalDialogOpen(open);
+                            if (!open) {
+                              setHasCarVerticalReport(null);
+                              setCarVerticalFile(null);
+                            }
+                          }}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                Raport CarVertical
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Raport CarVertical</DialogTitle>
+                              </DialogHeader>
+                              {hasCarVerticalReport === null ? (
+                                <div className="space-y-4">
+                                  <p className="text-sm text-muted-foreground">
+                                    Ai deja un raport CarVertical pentru această mașină?
+                                  </p>
+                                  <div className="flex gap-3">
+                                    <Button 
+                                      className="flex-1"
+                                      onClick={() => setHasCarVerticalReport(true)}
+                                    >
+                                      Da
+                                    </Button>
+                                    <Button 
+                                      variant="outline"
+                                      className="flex-1"
+                                      onClick={() => setHasCarVerticalReport(false)}
+                                    >
+                                      Nu
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : hasCarVerticalReport ? (
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="carvertical-file">Încarcă Raport CarVertical (PDF)</Label>
+                                    <Input
+                                      id="carvertical-file"
+                                      type="file"
+                                      accept=".pdf"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          setCarVerticalFile(file);
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    />
+                                  </div>
+                                  <div className="flex gap-3">
+                                    <Button 
+                                      className="flex-1"
+                                      onClick={handleUploadCarVerticalReport}
+                                      disabled={!carVerticalFile}
+                                    >
+                                      <Upload className="h-4 w-4 mr-2" />
+                                      Încarcă
+                                    </Button>
+                                    <Button 
+                                      variant="outline"
+                                      className="flex-1"
+                                      onClick={() => setHasCarVerticalReport(null)}
+                                    >
+                                      Înapoi
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                                    <h4 className="font-semibold flex items-center gap-2">
+                                      <FileText className="h-4 w-4" />
+                                      Despre CarVertical
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground">
+                                      CarVertical oferă rapoarte detaliate despre istoricul vehiculelor, incluzând:
+                                    </p>
+                                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                                      <li>Istoric complet al accidentelor</li>
+                                      <li>Kilometraj verificat</li>
+                                      <li>Furturi și daune</li>
+                                      <li>Număr de proprietari anteriori</li>
+                                      <li>Istoric service</li>
+                                    </ul>
+                                  </div>
+                                  <div className="flex gap-3">
+                                    <Button 
+                                      className="flex-1"
+                                      onClick={() => window.open(`https://www.carvertical.ro/?vin=${selectedCar.vin || ''}`, '_blank')}
+                                      disabled={!selectedCar.vin}
+                                    >
+                                      <ExternalLink className="h-4 w-4 mr-2" />
+                                      Cumpără Raport
+                                    </Button>
+                                    <Button 
+                                      variant="outline"
+                                      className="flex-1"
+                                      onClick={() => setIsCarVerticalDialogOpen(false)}
+                                    >
+                                      Închide
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </DialogContent>
+                          </Dialog>
                           <Button variant="outline" size="sm" onClick={generatePDF}>
                             <Download className="h-4 w-4 mr-2" />
                             Descarcă PDF
@@ -1304,6 +1461,40 @@ const MyCars = () => {
                           </Badge>
                         </div>
                       </div>
+
+                      {/* CarVertical Reports */}
+                      {carVerticalReports.length > 0 && (
+                        <div className="mb-6">
+                          <h4 className="text-md font-semibold mb-3 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Rapoarte CarVertical
+                          </h4>
+                          <div className="space-y-3">
+                            {carVerticalReports.map((report) => (
+                              <Card key={report.id}>
+                                <CardContent className="pt-6">
+                                  <div className="flex justify-between items-center">
+                                    <div>
+                                      <p className="font-medium">Raport CarVertical</p>
+                                      <p className="text-sm text-muted-foreground">
+                                        Încărcat: {new Date(report.uploaded_at).toLocaleDateString('ro-RO')}
+                                      </p>
+                                    </div>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => window.open(report.file_url, '_blank')}
+                                    >
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Descarcă
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {serviceHistory.length === 0 && manualHistory.length === 0 ? (
                         <Card className="text-center py-12">

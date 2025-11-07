@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import RequestService from "./pages/RequestService";
 import ServiceDetails from "./pages/ServiceDetails";
 import JobRequests from "./pages/JobRequests";
+import EditRequest from "./pages/EditRequest";
 import MyCars from "./pages/MyCars";
 import GarageManagement from "./pages/GarageManagement";
 import Settings from "./pages/Settings";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/request-service" element={<RequestService />} />
             <Route path="/service-details" element={<ServiceDetails />} />
             <Route path="/my-requests" element={<JobRequests />} />
+            <Route path="/edit-request/:jobId" element={<EditRequest />} />
             <Route path="/my-cars" element={<MyCars />} />
             <Route path="/garage" element={<GarageManagement />} />
             <Route path="/settings" element={<Settings />} />

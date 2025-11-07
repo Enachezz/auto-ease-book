@@ -29,7 +29,8 @@ import {
   CheckCircle,
   Camera,
   Upload,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react';
 import carsImage from '@/assets/cars.png';
 
@@ -428,7 +429,7 @@ const MyCars = () => {
         logoImg.onload = resolve;
       });
 
-      const totalPages = Math.ceil((serviceHistory.length + manualHistory.length) / 10) + 1;
+      const totalPages = Math.ceil((serviceHistory.length + manualHistory.length) / 8) + 1;
 
       const addPageElements = (pageNum: number) => {
         // Add logo in bottom right corner
@@ -443,157 +444,244 @@ const MyCars = () => {
         doc.setTextColor(0, 0, 0);
       };
 
-      // Header with decorative line
+      // Modern header with gradient effect
+      doc.setFillColor(26, 35, 126);
+      doc.rect(0, 0, 210, 45, 'F');
       doc.setFillColor(41, 128, 185);
-      doc.rect(0, 0, 210, 35, 'F');
+      doc.rect(0, 0, 210, 40, 'F');
       
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(24);
+      doc.setFontSize(28);
       doc.setFont('helvetica', 'bold');
-      doc.text('RAPORT ISTORIC VEHICUL', 105, 15, { align: 'center' });
+      doc.text('ISTORIC VEHICUL', 105, 20, { align: 'center' });
       
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Generat: ${new Date().toLocaleDateString('ro-RO')}`, 105, 25, { align: 'center' });
+      doc.text(`Generat: ${new Date().toLocaleDateString('ro-RO')} | AutoFix Report`, 105, 32, { align: 'center' });
       
       doc.setTextColor(0, 0, 0);
 
-      // Car details section with background
-      doc.setFillColor(240, 240, 240);
-      doc.roundedRect(15, 45, 180, 55, 3, 3, 'F');
+      // Vehicle Overview Section - Card Style
+      let yPos = 55;
+      doc.setFillColor(248, 249, 250);
+      doc.roundedRect(15, yPos, 180, 60, 4, 4, 'F');
       
-      doc.setFontSize(16);
+      // Add border accent
+      doc.setDrawColor(41, 128, 185);
+      doc.setLineWidth(1);
+      doc.line(15, yPos + 12, 195, yPos + 12);
+      
+      doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(41, 128, 185);
-      doc.text('Detalii Vehicul', 20, 55);
+      doc.text('INFORMAȚII VEHICUL', 20, yPos + 8);
       
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.setTextColor(0, 0, 0);
+      doc.setTextColor(50, 50, 50);
+      
+      // Left column
+      doc.setFont('helvetica', 'bold');
+      doc.text('Marca & Model:', 20, yPos + 22);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.car_makes?.name} ${selectedCar.car_models?.name}`, 20, yPos + 28);
       
       doc.setFont('helvetica', 'bold');
-      doc.text('Marca:', 20, 65);
+      doc.text('An fabricație:', 20, yPos + 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.car_makes?.name}`, 55, 65);
+      doc.text(`${selectedCar.year}`, 20, yPos + 44);
       
       doc.setFont('helvetica', 'bold');
-      doc.text('Model:', 20, 73);
+      doc.text('Culoare:', 20, yPos + 50);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.car_models?.name}`, 55, 73);
+      doc.text(`${selectedCar.color || 'Nespecificat'}`, 20, yPos + 56);
+      
+      // Right column
+      doc.setFont('helvetica', 'bold');
+      doc.text('VIN:', 110, yPos + 22);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`${selectedCar.vin || 'Nespecificat'}`, 110, yPos + 28);
       
       doc.setFont('helvetica', 'bold');
-      doc.text('An fabricație:', 20, 81);
+      doc.text('Nr. înmatriculare:', 110, yPos + 38);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.year}`, 55, 81);
+      doc.text(`${selectedCar.license_plate || 'Nespecificat'}`, 110, yPos + 44);
       
       doc.setFont('helvetica', 'bold');
-      doc.text('VIN:', 110, 65);
+      doc.text('Kilometraj actual:', 110, yPos + 50);
       doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.vin || 'Nu este specificat'}`, 125, 65);
-      
-      doc.setFont('helvetica', 'bold');
-      doc.text('Nr. înmatriculare:', 110, 73);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.license_plate || 'Nu este specificat'}`, 150, 73);
-      
-      doc.setFont('helvetica', 'bold');
-      doc.text('Kilometraj:', 110, 81);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`${selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} km` : 'Nu este specificat'}`, 137, 81);
+      doc.text(`${selectedCar.mileage ? `${selectedCar.mileage.toLocaleString()} km` : 'Nespecificat'}`, 110, yPos + 56);
 
-      let yPosition = 115;
+      let yPosition = 125;
       let pageNum = 1;
 
-      // Service history section
+      // Summary Statistics Card
+      const totalServices = serviceHistory.length + manualHistory.length;
+      const totalCost = manualHistory.reduce((sum, entry) => sum + (entry.cost || 0), 0);
+      
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(15, yPosition, 87, 25, 3, 3, 'FD');
+      doc.roundedRect(108, yPosition, 87, 25, 3, 3, 'FD');
+      
+      // Total services
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Servicii totale', 20, yPosition + 8);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text(totalServices.toString(), 20, yPosition + 20);
+      
+      // Total cost
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(100, 100, 100);
+      doc.text('Cost total înregistrat', 113, yPosition + 8);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(41, 128, 185);
+      doc.text(`${totalCost.toLocaleString()} RON`, 113, yPosition + 20);
+      
+      yPosition += 35;
+      doc.setTextColor(0, 0, 0);
+
+      // Service history section - Modern card style
       if (serviceHistory.length > 0) {
-        doc.setFontSize(14);
+        doc.setFillColor(41, 128, 185);
+        doc.rect(15, yPosition, 4, 8, 'F');
+        
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(41, 128, 185);
-        doc.text('Istoric Service (Platformă)', 20, yPosition);
+        doc.text('ISTORIC SERVICE PLATFORMĂ', 22, yPosition + 6);
         doc.setTextColor(0, 0, 0);
-        yPosition += 8;
-        
-        doc.setDrawColor(41, 128, 185);
-        doc.setLineWidth(0.5);
-        doc.line(20, yPosition, 190, yPosition);
-        yPosition += 8;
+        yPosition += 15;
 
         serviceHistory.forEach((service, index) => {
-          if (yPosition > 265) {
+          if (yPosition > 260) {
             addPageElements(pageNum);
             doc.addPage();
             pageNum++;
             yPosition = 20;
           }
 
-          doc.setFillColor(250, 250, 250);
-          doc.roundedRect(20, yPosition - 5, 170, 15, 2, 2, 'F');
+          // Service card with shadow effect
+          doc.setDrawColor(220, 220, 220);
+          doc.setFillColor(255, 255, 255);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(15, yPosition, 180, 22, 3, 3, 'FD');
           
+          // Status badge
+          const statusColor = service.status === 'completed' ? [34, 197, 94] : 
+                            service.status === 'open' ? [59, 130, 246] : [156, 163, 175];
+          doc.setFillColor(statusColor[0], statusColor[1], statusColor[2]);
+          doc.roundedRect(170, yPosition + 4, 20, 6, 2, 2, 'F');
+          doc.setFontSize(7);
+          doc.setTextColor(255, 255, 255);
+          doc.text(service.status.toUpperCase(), 180, yPosition + 8, { align: 'center' });
+          
+          // Service details
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text(`${index + 1}. ${service.title}`, 25, yPosition);
+          doc.setTextColor(30, 30, 30);
+          doc.text(`${service.title}`, 20, yPosition + 8);
           
-          doc.setFontSize(9);
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(100, 100, 100);
-          doc.text(`Data: ${new Date(service.created_at).toLocaleDateString('ro-RO')} | Status: ${service.status}`, 25, yPosition + 7);
-          doc.setTextColor(0, 0, 0);
+          const serviceDesc = service.description.length > 80 ? 
+                             service.description.substring(0, 80) + '...' : 
+                             service.description;
+          doc.text(serviceDesc, 20, yPosition + 14);
           
-          yPosition += 20;
+          doc.setFontSize(7);
+          doc.text(`Data: ${new Date(service.created_at).toLocaleDateString('ro-RO')}`, 20, yPosition + 19);
+          
+          yPosition += 27;
         });
       }
 
-      // Manual history section
+      // Manual history section - Modern card style
       if (manualHistory.length > 0) {
-        if (yPosition > 240) {
+        if (yPosition > 235) {
           addPageElements(pageNum);
           doc.addPage();
           pageNum++;
           yPosition = 20;
         } else {
-          yPosition += 10;
+          yPosition += 5;
         }
 
-        doc.setFontSize(14);
+        doc.setFillColor(41, 128, 185);
+        doc.rect(15, yPosition, 4, 8, 'F');
+        
+        doc.setFontSize(13);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(41, 128, 185);
-        doc.text('Istoric Manual', 20, yPosition);
+        doc.text('ISTORIC MANUAL', 22, yPosition + 6);
         doc.setTextColor(0, 0, 0);
-        yPosition += 8;
-        
-        doc.setDrawColor(41, 128, 185);
-        doc.setLineWidth(0.5);
-        doc.line(20, yPosition, 190, yPosition);
-        yPosition += 8;
+        yPosition += 15;
 
         manualHistory.forEach((entry, index) => {
-          if (yPosition > 265) {
+          if (yPosition > 255) {
             addPageElements(pageNum);
             doc.addPage();
             pageNum++;
             yPosition = 20;
           }
 
-          const entryHeight = entry.cost ? 20 : 15;
-          doc.setFillColor(250, 250, 250);
-          doc.roundedRect(20, yPosition - 5, 170, entryHeight, 2, 2, 'F');
+          const entryHeight = 28;
           
+          // Entry card with shadow effect
+          doc.setDrawColor(220, 220, 220);
+          doc.setFillColor(255, 255, 255);
+          doc.setLineWidth(0.3);
+          doc.roundedRect(15, yPosition, 180, entryHeight, 3, 3, 'FD');
+          
+          // Type badge
+          const typeColors: any = {
+            service: [59, 130, 246],
+            maintenance: [34, 197, 94],
+            repair: [239, 68, 68],
+            inspection: [168, 85, 247]
+          };
+          const badgeColor = typeColors[entry.type] || [156, 163, 175];
+          doc.setFillColor(badgeColor[0], badgeColor[1], badgeColor[2]);
+          doc.roundedRect(170, yPosition + 4, 20, 6, 2, 2, 'F');
+          doc.setFontSize(7);
+          doc.setTextColor(255, 255, 255);
+          doc.text(entry.type.toUpperCase(), 180, yPosition + 8, { align: 'center' });
+          
+          // Entry details
           doc.setFontSize(11);
           doc.setFont('helvetica', 'bold');
-          doc.text(`${index + 1}. ${entry.title}`, 25, yPosition);
+          doc.setTextColor(30, 30, 30);
+          doc.text(`${entry.title}`, 20, yPosition + 8);
           
-          doc.setFontSize(9);
+          doc.setFontSize(8);
           doc.setFont('helvetica', 'normal');
           doc.setTextColor(100, 100, 100);
-          let detailsText = `Data: ${new Date(entry.date).toLocaleDateString('ro-RO')}`;
-          if (entry.mileage) detailsText += ` | Km: ${entry.mileage.toLocaleString()}`;
-          if (entry.location) detailsText += ` | Loc: ${entry.location}`;
-          doc.text(detailsText, 25, yPosition + 7);
+          const desc = entry.description.length > 80 ? 
+                      entry.description.substring(0, 80) + '...' : 
+                      entry.description;
+          doc.text(desc, 20, yPosition + 14);
           
+          // Metadata row
+          doc.setFontSize(7);
+          let metaText = `Data: ${new Date(entry.date).toLocaleDateString('ro-RO')}`;
+          if (entry.mileage) metaText += ` | Kilometraj: ${entry.mileage.toLocaleString()} km`;
+          if (entry.location) metaText += ` | ${entry.location}`;
+          doc.text(metaText, 20, yPosition + 20);
+          
+          // Cost highlight
           if (entry.cost) {
+            doc.setFontSize(10);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(41, 128, 185);
-            doc.text(`Cost: ${entry.cost} RON`, 25, yPosition + 13);
+            doc.text(`${entry.cost} RON`, 20, yPosition + 26);
           }
           
           doc.setTextColor(0, 0, 0);
@@ -1198,6 +1286,15 @@ const MyCars = () => {
                               </div>
                             </DialogContent>
                           </Dialog>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => window.open(`https://www.carvertical.ro/?vin=${selectedCar.vin || ''}`, '_blank')}
+                            disabled={!selectedCar.vin}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Raport CarVertical
+                          </Button>
                           <Button variant="outline" size="sm" onClick={generatePDF}>
                             <Download className="h-4 w-4 mr-2" />
                             Descarcă PDF

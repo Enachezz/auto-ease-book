@@ -4,11 +4,13 @@ import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Search, Wrench, Disc, Settings, Zap, Circle, Truck, Cog, Wind, Hammer as HammerIcon, Shield, Key, Move, Gauge, Eye, Hammer as ToolIcon, HelpCircle, Stethoscope, Battery, SearchIcon } from 'lucide-react';
+import { ArrowLeft, Search, Wrench, Disc, Settings, Zap, Circle, Truck, Cog, Wind, Hammer as HammerIcon, Shield, Key, Move, Gauge, Eye, Hammer as ToolIcon, HelpCircle, Stethoscope, Battery, SearchIcon, Siren } from 'lucide-react';
+import { EmergencyMechanicDialog } from '@/components/EmergencyMechanicDialog';
 
 const RequestService = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
 
   const repairCategories = {
     popular: [
@@ -208,7 +210,28 @@ const RequestService = () => {
             )}
           </div>
         )}
+
+        {/* Emergency Mechanic Button */}
+        <div className="mt-8 pt-6 border-t border-border">
+          <Button 
+            variant="destructive" 
+            size="lg"
+            className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            onClick={() => setEmergencyDialogOpen(true)}
+          >
+            <Siren className="h-5 w-5 mr-2" />
+            Apel de Urgență - Mecanic Acum
+          </Button>
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            Ai nevoie de ajutor urgent? Solicită un mecanic la locația ta curentă
+          </p>
+        </div>
       </div>
+
+      <EmergencyMechanicDialog
+        open={emergencyDialogOpen}
+        onOpenChange={setEmergencyDialogOpen}
+      />
     </Layout>
   );
 };

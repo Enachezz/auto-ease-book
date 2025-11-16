@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin, AlertCircle, Plus, LogIn, Siren } from 'lucide-react';
+import { ArrowLeft, Car, Calendar as CalendarIcon, MapPin, AlertCircle, Plus, LogIn } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { EmergencyMechanicDialog } from '@/components/EmergencyMechanicDialog';
 
 interface UserCar {
   id: string;
@@ -40,7 +39,6 @@ const ServiceDetails = () => {
   const [cars, setCars] = useState<UserCar[]>([]);
   const [loadingCars, setLoadingCars] = useState(true);
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
-  const [emergencyDialogOpen, setEmergencyDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     description: '',
     preferredDate: undefined as Date | undefined,
@@ -392,29 +390,8 @@ const ServiceDetails = () => {
                 </Button>
               </div>
             </form>
-
-            {/* Emergency Button */}
-            <div className="mt-6 pt-6 border-t border-border">
-              <Button
-                type="button"
-                onClick={() => setEmergencyDialogOpen(true)}
-                className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                size="lg"
-              >
-                <Siren className="h-5 w-5 mr-2 animate-pulse" />
-                Apel de Urgență - Mecanic Acum
-              </Button>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Ai nevoie de ajutor imediat? Solicită un mecanic care vine la tine în timp real
-              </p>
-            </div>
           </CardContent>
         </Card>
-
-        <EmergencyMechanicDialog 
-          open={emergencyDialogOpen} 
-          onOpenChange={setEmergencyDialogOpen}
-        />
 
         <AlertDialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
           <AlertDialogContent>

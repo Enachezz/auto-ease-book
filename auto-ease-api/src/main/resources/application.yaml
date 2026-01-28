@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: auto-ease
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db
+    username: postgres
+    password: 12345
+
+  flyway:
+    user: postgres
+    password: 12345
+    schemas: db
+    url: jdbc:postgresql://localhost:5432/db
+    locations: classpath:db/migration
+    out-of-order: true
+    validate-on-migrate: false
+
+
+server:
+  port: 8080
+  address: 0.0.0.0
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        # secure: false by default (for localhost HTTP)
+        # Overridden to true in application-prod.yml for production (HTTPS)
+        secure: false
+        http-only: true

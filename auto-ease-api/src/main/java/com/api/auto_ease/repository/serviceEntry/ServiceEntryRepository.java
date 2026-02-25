@@ -12,9 +12,9 @@ public interface ServiceEntryRepository extends JpaRepository<ServiceEntry, Long
 
     List<ServiceEntry> findAlLByPriority(int priority);
 
-    List<ServiceEntry> findAllOrderByPriorityDesc();
+    List<ServiceEntry> findAllByOrderByPriorityDesc();
 
-    List<ServiceEntry> findAllOrderByPrioryAsc();
+    List<ServiceEntry> findAllByOrderByPriorityAsc();
 
     List<ServiceEntry> findByServiceUuid(String serviceUuid);
 

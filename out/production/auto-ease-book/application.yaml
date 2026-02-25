@@ -9,9 +9,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/db
     username: postgres
     password: 12345
-    hikari:
-      schema: db_test
-
 
   jpa:
     hibernate:

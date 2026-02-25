@@ -14,5 +14,6 @@ public class AppUserRestController {
     public Car updateCar() {
 
         appUserService.updateCar();
+        return null;
     }
 }

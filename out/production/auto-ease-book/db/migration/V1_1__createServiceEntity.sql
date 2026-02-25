@@ -7,14 +7,15 @@ CREATE TABLE SERVICE(
     phone           INTEGER,
     email           VARCHAR(200),
     address         VARCHAR(500)
-);
+)
+
 
 CREATE TABLE SPECIALIZATION(
    name            VARCHAR(50) PRIMARY KEY
-);
+)
 
 CREATE TABLE SERVICE_SPECIALIZATION(
    service_uuid    VARCHAR(50),
    name            VARCHAR(50),
-   PRIMARY KEY (service_uuid, name)
-);
+   PRIMARY KEY (student_id, course_id)
+)

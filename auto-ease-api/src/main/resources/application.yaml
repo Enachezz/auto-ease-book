@@ -38,3 +38,6 @@ spring:
         # Overridden to true in application-prod.yml for production (HTTPS)
         secure: false
         http-only: true
+jwt:
+  secret: auto-ease-jwt-secret-key-that-is-long-enough-for-hs256-algorithm-minimum-32-bytes
+  expiration-ms: 86400000

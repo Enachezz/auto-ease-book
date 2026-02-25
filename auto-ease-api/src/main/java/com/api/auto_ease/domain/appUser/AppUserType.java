@@ -1,6 +1,7 @@
 package com.api.auto_ease.domain.appUser;
 
 public enum AppUserType {
-    CLIENT,
-    SERVICE
+    CAR_OWNER,
+    GARAGE,
+    ADMIN
 }

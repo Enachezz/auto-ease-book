@@ -43,7 +43,7 @@ public class ClientServiceEntryStrategy implements ServiceEntryStrategy<ClientSe
 
     @Override
     public AppUserType getUserType() {
-        return AppUserType.CLIENT;
+        return AppUserType.CAR_OWNER;
     }
 }
 

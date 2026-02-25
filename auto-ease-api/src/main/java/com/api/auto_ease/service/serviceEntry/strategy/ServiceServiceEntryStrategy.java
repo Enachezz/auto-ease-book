@@ -46,7 +46,7 @@ public class ServiceServiceEntryStrategy implements ServiceEntryStrategy<Service
 
     @Override
     public AppUserType getUserType() {
-        return AppUserType.SERVICE;
+        return AppUserType.GARAGE;
     }
 }
 

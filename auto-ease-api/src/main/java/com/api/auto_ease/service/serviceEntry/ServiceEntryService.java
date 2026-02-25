@@ -32,8 +32,8 @@ public class ServiceEntryService {
     @jakarta.annotation.PostConstruct
     public void init() {
         strategyMap = new HashMap<>();
-        strategyMap.put(AppUserType.CLIENT, clientStrategy);
-        strategyMap.put(AppUserType.SERVICE, serviceStrategy);
+        strategyMap.put(AppUserType.CAR_OWNER, clientStrategy);
+        strategyMap.put(AppUserType.GARAGE, serviceStrategy);
     }
 
     public ServiceEntry processServiceEntry(String userUuid, Object payload) {
@@ -48,9 +48,9 @@ public class ServiceEntryService {
             throw new IllegalArgumentException("No strategy found for user type: " + user.getType());
         }
 
-        if (user.getType() == AppUserType.CLIENT) {
+        if (user.getType() == AppUserType.CAR_OWNER) {
             return clientStrategy.processServiceEntry((ClientServiceEntryRequest) payload);
-        } else if (user.getType() == AppUserType.SERVICE) {
+        } else if (user.getType() == AppUserType.GARAGE) {
             return serviceStrategy.processServiceEntry((ServiceLookupRequest) payload);
         }
 

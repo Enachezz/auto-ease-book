@@ -38,6 +38,9 @@ public class AppUser {
     @Enumerated(EnumType.STRING)
     private AppUserType type;
 
+    @Column(name = "password")
+    private String password;
+
     @PreUpdate
     void onUpdate() {
         modifiedDate = now();

@@ -8,7 +8,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -21,3 +21,7 @@ spring:
     password: 12345
     schemas: db_test
     url: jdbc:postgresql://localhost:5432/db
+
+jwt:
+  secret: auto-ease-jwt-secret-key-that-is-long-enough-for-hs256-algorithm-minimum-32-bytes
+  expiration-ms: 86400000

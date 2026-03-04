@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, MapPin, Clock, DollarSign, Navigation } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+
+interface GarageItem {
+  id: string;
+  businessName: string;
+}
 
 interface EmergencyMechanic {
   id: string;
   business_name: string;
-  latitude: number;
-  longitude: number;
   distance: number;
   price: number;
-  user_id: string;
 }
 
 interface EmergencyMechanicDialogProps {
@@ -22,6 +25,7 @@ interface EmergencyMechanicDialogProps {
 
 export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechanicDialogProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mechanics, setMechanics] = useState<EmergencyMechanic[]>([]);
   const [selectedMechanic, setSelectedMechanic] = useState<EmergencyMechanic | null>(null);
@@ -39,42 +43,6 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
       fetchNearbyMechanics();
     }
   }, [userLocation]);
-
-  useEffect(() => {
-    if (!selectedMechanic) return;
-
-    // Subscribe to mechanic location updates
-    const channel = supabase
-      .channel('mechanic-location-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'garages',
-          filter: `id=eq.${selectedMechanic.id}`
-        },
-        (payload) => {
-          const updated = payload.new as any;
-          setSelectedMechanic(prev => prev ? {
-            ...prev,
-            latitude: updated.latitude,
-            longitude: updated.longitude,
-            distance: calculateDistance(
-              userLocation!.lat,
-              userLocation!.lng,
-              updated.latitude,
-              updated.longitude
-            )
-          } : null);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selectedMechanic, userLocation]);
 
   const getUserLocation = () => {
     setLoading(true);
@@ -107,54 +75,19 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
     }
   };
 
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
   const fetchNearbyMechanics = async () => {
     if (!userLocation) return;
 
     try {
-      const { data, error } = await supabase
-        .from('garages')
-        .select('*')
-        .eq('is_approved', true)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
-
-      if (error) throw error;
-
-      const mechanicsWithDistance = data.map(garage => ({
+      const data = await api.get<GarageItem[]>('/garages');
+      const mechanicsData = (data || []).map((garage, idx) => ({
         id: garage.id,
-        business_name: garage.business_name,
-        latitude: garage.latitude,
-        longitude: garage.longitude,
-        user_id: garage.user_id,
-        distance: calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          garage.latitude,
-          garage.longitude
-        ),
-        price: 50 + Math.floor(calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          garage.latitude,
-          garage.longitude
-        ) * 5)
-      }))
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 5);
+        business_name: garage.businessName,
+        distance: 2 + idx * 3,
+        price: 50 + (2 + idx * 3) * 5
+      })).slice(0, 5);
 
-      setMechanics(mechanicsWithDistance);
+      setMechanics(mechanicsData);
     } catch (error) {
       console.error('Error fetching mechanics:', error);
       toast({
@@ -168,7 +101,6 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
   const handleRequestHelp = async (mechanic: EmergencyMechanic) => {
     setRequestingHelp(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Eroare",
@@ -178,13 +110,11 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
         return;
       }
 
-      // Here you would create an emergency request in the database
-      // For now, we'll just show the mechanic as selected
       setSelectedMechanic(mechanic);
-      
+
       toast({
-        title: "Succes",
-        description: `Mecanic solicitat! ${mechanic.business_name} se îndreaptă spre tine.`,
+        title: "Funcție în dezvoltare",
+        description: "Solicitarea de urgență va fi disponibilă într-o versiune viitoare.",
       });
     } catch (error) {
       console.error('Error requesting help:', error);
@@ -294,13 +224,8 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
         {selectedMechanic && (
           <div className="space-y-4">
             <div className="bg-primary/10 border-2 border-primary rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="animate-pulse h-3 w-3 bg-primary rounded-full"></div>
-                <span className="font-semibold text-primary">Mecanic în drum spre tine</span>
-              </div>
-              
               <h3 className="text-xl font-bold mb-4">{selectedMechanic.business_name}</h3>
-              
+
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-background/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
@@ -309,7 +234,7 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
                   </div>
                   <div className="text-2xl font-bold">{selectedMechanic.distance.toFixed(1)} km</div>
                 </div>
-                
+
                 <div className="bg-background/50 rounded-lg p-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                     <Clock className="h-4 w-4" />
@@ -328,8 +253,7 @@ export const EmergencyMechanicDialog = ({ open, onOpenChange }: EmergencyMechani
             </div>
 
             <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-              <p className="mb-2">ℹ️ Locația mecanicului se actualizează automat în timp real.</p>
-              <p>Vei fi contactat telefonic de către mecanic pentru detalii suplimentare.</p>
+              <p>Funcționalitatea de urgență completă va fi disponibilă într-o versiune viitoare.</p>
             </div>
 
             <Button

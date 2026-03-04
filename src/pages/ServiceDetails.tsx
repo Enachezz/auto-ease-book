@@ -14,19 +14,22 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 interface UserCar {
   id: string;
-  make_id: string;
-  model_id: string;
   year: number;
   vin: string | null;
   license_plate: string | null;
   car_makes?: { name: string };
   car_models?: { name: string };
+}
+
+interface ServiceCategory {
+  id: string;
+  name: string;
 }
 
 const ServiceDetails = () => {
@@ -43,7 +46,7 @@ const ServiceDetails = () => {
     description: '',
     preferredDate: undefined as Date | undefined,
     location: '',
-    urgency: 'medium',
+    urgency: 'NORMAL',
     carId: ''
   });
 
@@ -58,17 +61,16 @@ const ServiceDetails = () => {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('cars')
-        .select(`
-          *,
-          car_makes(name),
-          car_models(name)
-        `)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setCars(data || []);
+      const data = await api.get<any[]>('/cars');
+      const mapped = (data || []).map((c: any) => ({
+        id: String(c.id),
+        year: c.year,
+        vin: c.vin,
+        license_plate: c.licensePlate,
+        car_makes: { name: c.makeName },
+        car_models: { name: c.modelName },
+      }));
+      setCars(mapped);
     } catch (error) {
       console.error('Error fetching cars:', error);
       toast({
@@ -97,7 +99,6 @@ const ServiceDetails = () => {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Eroare",
@@ -107,61 +108,25 @@ const ServiceDetails = () => {
         return;
       }
 
-      // Get or create service category
       let categoryId = null;
-      const { data: categories } = await supabase
-        .from('service_categories')
-        .select('id')
-        .limit(1)
-        .single();
-      
-      categoryId = categories?.id;
-
-      if (!categoryId) {
-        toast({
-          title: "Eroare",
-          description: "Nu s-a putut găsi categoria de service.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check for duplicate requests with same car, category, and date
-      if (formData.preferredDate) {
-        const preferredDateStr = formData.preferredDate.toISOString().split('T')[0];
-        const { data: existingRequests, error: checkError } = await supabase
-          .from('job_requests')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('car_id', formData.carId)
-          .eq('category_id', categoryId)
-          .eq('preferred_date', preferredDateStr)
-          .eq('status', 'open');
-
-        if (checkError) throw checkError;
-
-        if (existingRequests && existingRequests.length > 0) {
-          setDuplicateDialogOpen(true);
-          return;
+      try {
+        const categories = await api.get<ServiceCategory[]>('/service-categories');
+        if (categories && categories.length > 0) {
+          categoryId = categories[0].id;
         }
+      } catch {
+        // ignore
       }
 
-      // Insert job request
-      const { error } = await supabase
-        .from('job_requests')
-        .insert({
-          user_id: user.id,
-          car_id: formData.carId,
-          category_id: categoryId,
-          title: selectedService,
-          description: formData.description,
-          preferred_date: formData.preferredDate?.toISOString().split('T')[0],
-          urgency: formData.urgency,
-          location_address: formData.location,
-          status: 'open'
-        });
-
-      if (error) throw error;
+      await api.post('/job-requests', {
+        carId: parseInt(formData.carId),
+        categoryId: categoryId,
+        title: selectedService,
+        description: formData.description,
+        preferredDate: formData.preferredDate?.toISOString().split('T')[0],
+        urgency: formData.urgency,
+        locationAddress: formData.location,
+      });
 
       toast({
         title: "Success",
@@ -355,9 +320,9 @@ const ServiceDetails = () => {
                 <Label>Urgența</Label>
                 <div className="flex gap-4">
                   {[
-                    { value: 'low', label: 'Nu e urgent', color: 'bg-green-100 text-green-800 border-green-300' },
-                    { value: 'medium', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
-                    { value: 'high', label: 'Urgent', color: 'bg-red-100 text-red-800 border-red-300' }
+                    { value: 'LOW', label: 'Nu e urgent', color: 'bg-green-100 text-green-800 border-green-300' },
+                    { value: 'NORMAL', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+                    { value: 'HIGH', label: 'Urgent', color: 'bg-red-100 text-red-800 border-red-300' }
                   ].map((urgency) => (
                     <button
                       key={urgency.value}

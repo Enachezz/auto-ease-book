@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, MapPin, Calendar, Clock, DollarSign, Car, Eye, Trash2, Edit, MoreVertical } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -20,31 +20,27 @@ interface JobRequest {
   title: string;
   description: string;
   urgency: string;
-  budget_min?: number;
-  budget_max?: number;
-  preferred_date?: string;
-  location_city?: string;
-  location_state?: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  preferredDate?: string;
+  locationCity?: string;
+  locationState?: string;
+  locationAddress?: string;
   status: string;
-  created_at: string;
+  quoteCount?: number;
 }
 
 interface Quote {
   id: string;
   price: number;
   description?: string;
-  estimated_duration?: string;
+  estimatedDuration?: string;
   status: string;
-  warranty_info?: string;
-  created_at: string;
-  garage_id: string;
-  garages?: {
-    business_name: string;
-    address: string;
-    city: string;
-    phone: string;
-    average_rating: number;
-  };
+  warrantyInfo?: string;
+  garageId: string;
+  garageName?: string;
+  garageCity?: string;
+  garageRating?: number;
 }
 
 export default function JobRequests() {
@@ -64,13 +60,7 @@ export default function JobRequests() {
 
   const fetchJobRequests = async () => {
     try {
-      const { data, error } = await supabase
-        .from('job_requests')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.get<any[]>('/job-requests');
       if (data) setJobRequests(data);
     } catch (error) {
       console.error('Error fetching job requests:', error);
@@ -79,22 +69,7 @@ export default function JobRequests() {
 
   const fetchQuotes = async (jobId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('quotes')
-        .select(`
-          *,
-          garages (
-            business_name,
-            address,
-            city,
-            phone,
-            average_rating
-          )
-        `)
-        .eq('job_request_id', jobId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.get<any[]>(`/job-requests/${jobId}/quotes`);
       if (data) setQuotes(data);
     } catch (error) {
       console.error('Error fetching quotes:', error);
@@ -109,18 +84,7 @@ export default function JobRequests() {
   const handleAcceptQuote = async (quoteId: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('quotes')
-        .update({ status: 'accepted' })
-        .eq('id', quoteId);
-
-      if (error) throw error;
-
-      // Update job status to closed
-      await supabase
-        .from('job_requests')
-        .update({ status: 'closed' })
-        .eq('id', selectedJob?.id);
+      await api.post(`/quotes/${quoteId}/accept`, {});
 
       toast({
         title: "Success",
@@ -140,46 +104,26 @@ export default function JobRequests() {
     }
   };
 
-  const handleRejectQuote = async (quoteId: string) => {
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from('quotes')
-        .update({ status: 'rejected' })
-        .eq('id', quoteId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Quote rejected"
-      });
-
-      if (selectedJob) fetchQuotes(selectedJob.id);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleRejectQuote = async (_quoteId: string) => {
+    toast({
+      title: "Info",
+      description: "Rejecting individual quotes is handled automatically when you accept another quote."
+    });
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open': return 'default';
-      case 'closed': return 'secondary';
+    switch (status.toUpperCase()) {
+      case 'OPEN': return 'default';
+      case 'BOOKED': return 'secondary';
       default: return 'secondary';
     }
   };
 
   const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'high': return 'destructive';
-      case 'medium': return 'default';
-      case 'low': return 'secondary';
+    switch (urgency.toUpperCase()) {
+      case 'HIGH': case 'EMERGENCY': return 'destructive';
+      case 'NORMAL': return 'default';
+      case 'LOW': return 'secondary';
       default: return 'secondary';
     }
   };
@@ -189,12 +133,7 @@ export default function JobRequests() {
     
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('job_requests')
-        .delete()
-        .eq('id', jobToDelete);
-
-      if (error) throw error;
+      await api.delete(`/job-requests/${jobToDelete}`);
 
       toast({
         title: "Succes",
@@ -247,32 +186,31 @@ export default function JobRequests() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h3 className="text-lg font-medium">{job.title}</h3>
-                    <p className="text-sm text-muted-foreground flex items-center mt-1">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      {job.location_city}, {job.location_state}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Requested {new Date(job.created_at).toLocaleDateString()}
-                    </p>
+                    {(job.locationCity || job.locationAddress) && (
+                      <p className="text-sm text-muted-foreground flex items-center mt-1">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {job.locationAddress || `${job.locationCity}, ${job.locationState}`}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-start gap-2">
                     <div className="flex flex-col gap-2 items-end">
                       <div className="flex gap-2">
                         <Badge variant={getUrgencyColor(job.urgency)}>
-                          {job.urgency} priority
+                          {job.urgency.toLowerCase()} priority
                         </Badge>
                         <Badge variant={getStatusColor(job.status)}>
                           {job.status}
                         </Badge>
                       </div>
-                      {job.budget_min && job.budget_max && (
+                      {job.budgetMin != null && job.budgetMax != null && (
                         <p className="text-sm text-muted-foreground">
-                          Budget: ${job.budget_min} - ${job.budget_max}
+                          Budget: ${job.budgetMin} - ${job.budgetMax}
                         </p>
                       )}
                     </div>
                     
-                    {job.status === 'open' && (
+                    {job.status.toUpperCase() === 'OPEN' && (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -302,10 +240,10 @@ export default function JobRequests() {
 
                 <p className="text-sm mb-4">{job.description}</p>
 
-                {job.preferred_date && (
+                {job.preferredDate && (
                   <p className="text-sm text-muted-foreground mb-4 flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Preferred date: {new Date(job.preferred_date).toLocaleDateString()}
+                    Preferred date: {new Date(job.preferredDate).toLocaleDateString()}
                   </p>
                 )}
 
@@ -318,7 +256,7 @@ export default function JobRequests() {
                         onClick={() => handleViewQuotes(job)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        View Quotes
+                        View Quotes {job.quoteCount ? `(${job.quoteCount})` : ''}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto mx-4">
@@ -333,22 +271,21 @@ export default function JobRequests() {
                               <CardContent className="p-4">
                                 <div className="flex justify-between items-start mb-3">
                                   <div>
-                                    <h4 className="font-medium">{quote.garages?.business_name}</h4>
-                                    <p className="text-sm text-muted-foreground">
-                                      {quote.garages?.address}, {quote.garages?.city}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                      Phone: {quote.garages?.phone}
-                                    </p>
-                                    {quote.garages?.average_rating && (
+                                    <h4 className="font-medium">{quote.garageName}</h4>
+                                    {quote.garageCity && (
                                       <p className="text-sm text-muted-foreground">
-                                        Rating: {quote.garages.average_rating}/5.0
+                                        {quote.garageCity}
+                                      </p>
+                                    )}
+                                    {quote.garageRating != null && (
+                                      <p className="text-sm text-muted-foreground">
+                                        Rating: {quote.garageRating}/5.0
                                       </p>
                                     )}
                                   </div>
                                   <div className="text-right">
                                     <p className="text-2xl font-bold text-primary">${quote.price}</p>
-                                    <Badge variant={quote.status === 'accepted' ? 'default' : quote.status === 'rejected' ? 'destructive' : 'secondary'}>
+                                    <Badge variant={quote.status === 'ACCEPTED' ? 'default' : quote.status === 'REJECTED' ? 'destructive' : 'secondary'}>
                                       {quote.status}
                                     </Badge>
                                   </div>
@@ -359,24 +296,21 @@ export default function JobRequests() {
                                 )}
 
                                 <div className="flex gap-4 text-sm text-muted-foreground mb-3">
-                                  {quote.estimated_duration && (
+                                  {quote.estimatedDuration && (
                                     <span className="flex items-center">
                                       <Clock className="h-3 w-3 mr-1" />
-                                      {quote.estimated_duration}
+                                      {quote.estimatedDuration}
                                     </span>
                                   )}
-                                  <span>
-                                    Quoted {new Date(quote.created_at).toLocaleDateString()}
-                                  </span>
                                 </div>
 
-                                {quote.warranty_info && (
+                                {quote.warrantyInfo && (
                                   <p className="text-sm text-muted-foreground mb-3">
-                                    Warranty: {quote.warranty_info}
+                                    Warranty: {quote.warrantyInfo}
                                   </p>
                                 )}
 
-                                {quote.status === 'pending' && selectedJob?.status === 'open' && (
+                                {quote.status === 'PENDING' && selectedJob?.status.toUpperCase() === 'OPEN' && (
                                   <div className="flex gap-2">
                                     <Button 
                                       size="sm" 

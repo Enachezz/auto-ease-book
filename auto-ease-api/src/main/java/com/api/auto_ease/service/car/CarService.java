@@ -108,7 +108,9 @@ public class CarService {
     private CarResponse toResponse(Car car, String makeName, String modelName) {
         return CarResponse.builder()
                 .id(car.getId())
+                .makeId(car.getMakeId().toString())
                 .makeName(makeName)
+                .modelId(car.getModelId().toString())
                 .modelName(modelName)
                 .year(car.getYear())
                 .color(car.getColor())

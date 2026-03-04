@@ -10,18 +10,20 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Wrench, MapPin, Clock, DollarSign, Calendar, Car } from 'lucide-react';
 
 interface Garage {
   id: string;
-  business_name: string;
+  businessName: string;
   address: string;
   city: string;
   state: string;
   phone: string;
-  is_approved: boolean;
+  postalCode: string;
+  description: string;
+  isApproved: boolean;
   services: string[];
 }
 
@@ -30,22 +32,21 @@ interface JobRequest {
   title: string;
   description: string;
   urgency: string;
-  budget_min?: number;
-  budget_max?: number;
-  preferred_date?: string;
-  location_city?: string;
-  location_state?: string;
-  created_at: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  preferredDate?: string;
+  locationCity?: string;
+  locationState?: string;
+  locationAddress?: string;
 }
 
 interface Quote {
   id: string;
-  job_request_id: string;
+  jobRequestId: string;
   price: number;
   description?: string;
-  estimated_duration?: string;
+  estimatedDuration?: string;
   status: string;
-  created_at: string;
 }
 
 export default function GarageManagement() {
@@ -59,22 +60,22 @@ export default function GarageManagement() {
   const [showGarageForm, setShowGarageForm] = useState(false);
 
   const [garageForm, setGarageForm] = useState({
-    business_name: '',
+    businessName: '',
     address: '',
     city: '',
     state: '',
-    postal_code: '',
+    postalCode: '',
     phone: '',
     description: '',
     services: [] as string[]
   });
 
   const [quoteForm, setQuoteForm] = useState({
-    job_request_id: '',
+    jobRequestId: '',
     price: '',
     description: '',
-    estimated_duration: '',
-    warranty_info: ''
+    estimatedDuration: '',
+    warrantyInfo: ''
   });
 
   const serviceOptions = [
@@ -89,48 +90,26 @@ export default function GarageManagement() {
 
   const fetchGarageData = async () => {
     try {
-      // Fetch garage profile
-      const { data: garageData } = await supabase
-        .from('garages')
-        .select('*')
-        .eq('user_id', user?.id)
-        .maybeSingle();
+      const garageData = await api.get<Garage>('/garages/me');
+      setGarage(garageData);
+      setGarageForm({
+        businessName: garageData.businessName,
+        address: garageData.address || '',
+        city: garageData.city || '',
+        state: garageData.state || '',
+        postalCode: garageData.postalCode || '',
+        phone: garageData.phone || '',
+        description: garageData.description || '',
+        services: garageData.services || []
+      });
 
-      if (garageData) {
-        setGarage(garageData);
-        setGarageForm({
-          business_name: garageData.business_name,
-          address: garageData.address,
-          city: garageData.city,
-          state: garageData.state,
-          postal_code: garageData.postal_code,
-          phone: garageData.phone,
-          description: garageData.description || '',
-          services: garageData.services || []
-        });
+      const jobsData = await api.get<JobRequest[]>('/job-requests/open');
+      if (jobsData) setJobRequests(jobsData);
 
-        // Fetch available job requests
-        const { data: jobsData } = await supabase
-          .from('job_requests')
-          .select('*')
-          .eq('status', 'open')
-          .order('created_at', { ascending: false });
-
-        if (jobsData) setJobRequests(jobsData);
-
-        // Fetch garage's quotes
-        const { data: quotesData } = await supabase
-          .from('quotes')
-          .select('*')
-          .eq('garage_id', garageData.id)
-          .order('created_at', { ascending: false });
-
-        if (quotesData) setQuotes(quotesData);
-      } else {
-        setShowGarageForm(true);
-      }
-    } catch (error) {
-      console.error('Error fetching garage data:', error);
+      const quotesData = await api.get<Quote[]>('/quotes/mine');
+      if (quotesData) setQuotes(quotesData);
+    } catch {
+      setShowGarageForm(true);
     }
   };
 
@@ -139,33 +118,16 @@ export default function GarageManagement() {
     setLoading(true);
 
     try {
-      const garageData = {
-        ...garageForm,
-        user_id: user?.id
-      };
-
       if (garage) {
-        // Update existing garage
-        const { error } = await supabase
-          .from('garages')
-          .update(garageData)
-          .eq('id', garage.id);
-
-        if (error) throw error;
+        await api.put('/garages/me', garageForm);
         toast({ title: "Success", description: "Garage updated successfully!" });
       } else {
-        // Create new garage
-        const { data, error } = await supabase
-          .from('garages')
-          .insert([garageData])
-          .select()
-          .single();
-
-        if (error) throw error;
+        const data = await api.post<Garage>('/garages', garageForm);
         setGarage(data);
         setShowGarageForm(false);
         toast({ title: "Success", description: "Garage profile created! Awaiting admin approval." });
       }
+      fetchGarageData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -182,25 +144,22 @@ export default function GarageManagement() {
     setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from('quotes')
-        .insert([{
-          ...quoteForm,
-          garage_id: garage?.id,
-          price: parseFloat(quoteForm.price)
-        }]);
-
-      if (error) throw error;
+      await api.post(`/job-requests/${quoteForm.jobRequestId}/quotes`, {
+        price: parseFloat(quoteForm.price),
+        description: quoteForm.description || null,
+        estimatedDuration: quoteForm.estimatedDuration || null,
+        warrantyInfo: quoteForm.warrantyInfo || null,
+      });
 
       toast({ title: "Success", description: "Quote submitted successfully!" });
       setQuoteForm({
-        job_request_id: '',
+        jobRequestId: '',
         price: '',
         description: '',
-        estimated_duration: '',
-        warranty_info: ''
+        estimatedDuration: '',
+        warrantyInfo: ''
       });
-      fetchGarageData(); // Refresh data
+      fetchGarageData();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -250,7 +209,7 @@ export default function GarageManagement() {
           </div>
         </div>
 
-        {garage && !garage.is_approved && (
+        {garage && !garage.isApproved && (
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -281,8 +240,9 @@ export default function GarageManagement() {
                   <div>
                     <Label htmlFor="business_name">Business Name</Label>
                     <Input
-                      value={garageForm.business_name}
-                      onChange={(e) => setGarageForm({ ...garageForm, business_name: e.target.value })}
+                      id="business_name"
+                      value={garageForm.businessName}
+                      onChange={(e) => setGarageForm({ ...garageForm, businessName: e.target.value })}
                       required
                     />
                   </div>
@@ -290,6 +250,7 @@ export default function GarageManagement() {
                   <div>
                     <Label htmlFor="description">Description</Label>
                     <Textarea
+                      id="description"
                       value={garageForm.description}
                       onChange={(e) => setGarageForm({ ...garageForm, description: e.target.value })}
                       placeholder="Tell customers about your garage..."
@@ -300,6 +261,7 @@ export default function GarageManagement() {
                     <div>
                       <Label htmlFor="phone">Phone</Label>
                       <Input
+                        id="phone"
                         value={garageForm.phone}
                         onChange={(e) => setGarageForm({ ...garageForm, phone: e.target.value })}
                         required
@@ -308,8 +270,9 @@ export default function GarageManagement() {
                     <div>
                       <Label htmlFor="postal_code">Postal Code</Label>
                       <Input
-                        value={garageForm.postal_code}
-                        onChange={(e) => setGarageForm({ ...garageForm, postal_code: e.target.value })}
+                        id="postal_code"
+                        value={garageForm.postalCode}
+                        onChange={(e) => setGarageForm({ ...garageForm, postalCode: e.target.value })}
                         required
                       />
                     </div>
@@ -318,6 +281,7 @@ export default function GarageManagement() {
                   <div>
                     <Label htmlFor="address">Address</Label>
                     <Input
+                      id="address"
                       value={garageForm.address}
                       onChange={(e) => setGarageForm({ ...garageForm, address: e.target.value })}
                       required
@@ -328,6 +292,7 @@ export default function GarageManagement() {
                     <div>
                       <Label htmlFor="city">City</Label>
                       <Input
+                        id="city"
                         value={garageForm.city}
                         onChange={(e) => setGarageForm({ ...garageForm, city: e.target.value })}
                         required
@@ -336,6 +301,7 @@ export default function GarageManagement() {
                     <div>
                       <Label htmlFor="state">State</Label>
                       <Input
+                        id="state"
                         value={garageForm.state}
                         onChange={(e) => setGarageForm({ ...garageForm, state: e.target.value })}
                         required
@@ -376,18 +342,20 @@ export default function GarageManagement() {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-medium">{job.title}</h3>
-                        <p className="text-sm text-muted-foreground flex items-center mt-1">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {job.location_city}, {job.location_state}
-                        </p>
+                        {(job.locationAddress || job.locationCity) && (
+                          <p className="text-sm text-muted-foreground flex items-center mt-1">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {job.locationAddress || `${job.locationCity}, ${job.locationState}`}
+                          </p>
+                        )}
                       </div>
                       <div className="text-right">
-                        <Badge variant={job.urgency === 'high' ? 'destructive' : job.urgency === 'medium' ? 'default' : 'secondary'}>
-                          {job.urgency} priority
+                        <Badge variant={job.urgency === 'HIGH' || job.urgency === 'EMERGENCY' ? 'destructive' : job.urgency === 'NORMAL' ? 'default' : 'secondary'}>
+                          {job.urgency.toLowerCase()} priority
                         </Badge>
-                        {job.budget_min && job.budget_max && (
+                        {job.budgetMin != null && job.budgetMax != null && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            Budget: ${job.budget_min} - ${job.budget_max}
+                            Budget: ${job.budgetMin} - ${job.budgetMax}
                           </p>
                         )}
                       </div>
@@ -395,10 +363,10 @@ export default function GarageManagement() {
                     
                     <p className="text-sm mb-4">{job.description}</p>
                     
-                    {job.preferred_date && (
+                    {job.preferredDate && (
                       <p className="text-sm text-muted-foreground mb-4 flex items-center">
                         <Calendar className="h-3 w-3 mr-1" />
-                        Preferred date: {new Date(job.preferred_date).toLocaleDateString()}
+                        Preferred date: {new Date(job.preferredDate).toLocaleDateString()}
                       </p>
                     )}
 
@@ -406,29 +374,32 @@ export default function GarageManagement() {
                       <h4 className="font-medium">Submit Quote</h4>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label htmlFor="price">Price ($)</Label>
+                          <Label htmlFor={`quote_price_${job.id}`}>Price ($)</Label>
                           <Input
+                            id={`quote_price_${job.id}`}
                             type="number"
                             step="0.01"
-                            value={quoteForm.job_request_id === job.id ? quoteForm.price : ''}
-                            onChange={(e) => setQuoteForm({ ...quoteForm, job_request_id: job.id, price: e.target.value })}
+                            value={quoteForm.jobRequestId === job.id ? quoteForm.price : ''}
+                            onChange={(e) => setQuoteForm({ ...quoteForm, jobRequestId: job.id, price: e.target.value })}
                             required
                           />
                         </div>
                         <div>
-                          <Label htmlFor="estimated_duration">Duration</Label>
+                          <Label htmlFor={`quote_duration_${job.id}`}>Duration</Label>
                           <Input
-                            value={quoteForm.job_request_id === job.id ? quoteForm.estimated_duration : ''}
-                            onChange={(e) => setQuoteForm({ ...quoteForm, job_request_id: job.id, estimated_duration: e.target.value })}
+                            id={`quote_duration_${job.id}`}
+                            value={quoteForm.jobRequestId === job.id ? quoteForm.estimatedDuration : ''}
+                            onChange={(e) => setQuoteForm({ ...quoteForm, jobRequestId: job.id, estimatedDuration: e.target.value })}
                             placeholder="e.g. 2 hours"
                           />
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor="description">Details</Label>
+                        <Label htmlFor={`quote_details_${job.id}`}>Details</Label>
                         <Textarea
-                          value={quoteForm.job_request_id === job.id ? quoteForm.description : ''}
-                          onChange={(e) => setQuoteForm({ ...quoteForm, job_request_id: job.id, description: e.target.value })}
+                          id={`quote_details_${job.id}`}
+                          value={quoteForm.jobRequestId === job.id ? quoteForm.description : ''}
+                          onChange={(e) => setQuoteForm({ ...quoteForm, jobRequestId: job.id, description: e.target.value })}
                           placeholder="Describe what you'll do, parts needed, etc."
                           rows={2}
                         />
@@ -436,7 +407,7 @@ export default function GarageManagement() {
                       <Button 
                         type="submit" 
                         size="sm" 
-                        disabled={loading || !garage?.is_approved || quoteForm.job_request_id !== job.id || !quoteForm.price}
+                        disabled={loading || !garage?.isApproved || quoteForm.jobRequestId !== job.id || !quoteForm.price}
                       >
                         {loading ? 'Submitting...' : 'Submit Quote'}
                       </Button>
@@ -464,14 +435,11 @@ export default function GarageManagement() {
                   <CardContent className="p-6">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="text-lg font-medium">Quote #{quote.id.slice(0, 8)}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Submitted {new Date(quote.created_at).toLocaleDateString()}
-                        </p>
+                        <h3 className="text-lg font-medium">Quote #{String(quote.id).slice(0, 8)}</h3>
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-bold">${quote.price}</p>
-                        <Badge variant={quote.status === 'accepted' ? 'default' : quote.status === 'rejected' ? 'destructive' : 'secondary'}>
+                        <Badge variant={quote.status === 'ACCEPTED' ? 'default' : quote.status === 'REJECTED' ? 'destructive' : 'secondary'}>
                           {quote.status}
                         </Badge>
                       </div>
@@ -479,9 +447,9 @@ export default function GarageManagement() {
                     {quote.description && (
                       <p className="text-sm mt-2">{quote.description}</p>
                     )}
-                    {quote.estimated_duration && (
+                    {quote.estimatedDuration && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        Estimated duration: {quote.estimated_duration}
+                        Estimated duration: {quote.estimatedDuration}
                       </p>
                     )}
                   </CardContent>

@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Car, 
@@ -193,20 +193,22 @@ const MyCars = () => {
 
   const fetchCars = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cars')
-        .select(`
-          *,
-          car_makes (name),
-          car_models (name)
-        `)
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCars(data || []);
-      if (data && data.length > 0 && !selectedCar) {
-        setSelectedCar(data[0]);
+      const data = await api.get<any[]>('/cars');
+      const mapped = (data || []).map((c: any) => ({
+        id: String(c.id),
+        make_id: c.makeId,
+        model_id: c.modelId,
+        year: c.year,
+        color: c.color,
+        license_plate: c.licensePlate,
+        mileage: c.mileage,
+        vin: c.vin,
+        car_makes: { name: c.makeName },
+        car_models: { name: c.modelName },
+      }));
+      setCars(mapped);
+      if (mapped.length > 0 && !selectedCar) {
+        setSelectedCar(mapped[0]);
       }
     } catch (error) {
       toast({
@@ -221,12 +223,7 @@ const MyCars = () => {
 
   const fetchCarMakes = async () => {
     try {
-      const { data, error } = await supabase
-        .from('car_makes')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
+      const data = await api.get<CarMake[]>('/car-makes');
       setCarMakes(data || []);
     } catch (error) {
       console.error('Error fetching car makes:', error);
@@ -234,76 +231,31 @@ const MyCars = () => {
   };
 
   const fetchCarModels = async (makeId: string) => {
-    console.log('Fetching car models for makeId:', makeId);
     try {
-      const { data, error } = await supabase
-        .from('car_models')
-        .select('*')
-        .eq('make_id', makeId)
-        .order('name');
-
-      if (error) {
-        console.error('Error fetching car models:', error);
-        throw error;
-      }
-      console.log('Fetched car models:', data);
+      const data = await api.get<CarModel[]>(`/car-makes/${makeId}/models`);
       setCarModels(data || []);
     } catch (error) {
       console.error('Error fetching car models:', error);
-      setCarModels([]); // Ensure models are cleared on error
+      setCarModels([]);
     }
   };
 
-  const fetchServiceHistory = async (carId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('job_requests')
-        .select(`
-          *,
-          quotes (
-            id,
-            price,
-            status,
-            garage_id,
-            garages (business_name),
-            bookings (
-              id,
-              scheduled_date,
-              status,
-              reviews (rating, comment)
-            )
-          )
-        `)
-        .eq('car_id', carId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setServiceHistory((data as any) || []);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch service history",
-        variant: "destructive",
-      });
-    }
+  const fetchServiceHistory = async (_carId: string) => {
+    // Service history with nested joins is deferred for MVP
+    setServiceHistory([]);
   };
 
   const handleAddCar = async () => {
     try {
-      const { error } = await supabase
-        .from('cars')
-        .insert({
-          user_id: user?.id,
-          make_id: newCar.make_id,
-          model_id: newCar.model_id,
-          year: newCar.year,
-          color: newCar.color || null,
-          license_plate: newCar.license_plate || null,
-          mileage: newCar.mileage ? parseInt(newCar.mileage) : null,
-          vin: newCar.vin || null
-        });
-
-      if (error) throw error;
+      await api.post('/cars', {
+        makeId: newCar.make_id,
+        modelId: newCar.model_id,
+        year: newCar.year,
+        color: newCar.color || null,
+        licensePlate: newCar.license_plate || null,
+        mileage: newCar.mileage ? parseInt(newCar.mileage) : null,
+        vin: newCar.vin || null,
+      });
 
       toast({
         title: "Success",
@@ -368,28 +320,7 @@ const MyCars = () => {
     if (!selectedCar || !user) return;
     
     try {
-      let fileUrl = newDocument.file_url;
-      
-      // Upload file to Supabase Storage if a file was selected
-      if (newDocument.file) {
-        const fileExt = newDocument.file.name.split('.').pop();
-        const fileName = `${user.id}/${selectedCar.id}/${Date.now()}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('car-documents')
-          .upload(fileName, newDocument.file);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('car-documents')
-          .getPublicUrl(fileName);
-        
-        fileUrl = publicUrl;
-      }
+      const fileUrl = newDocument.file_url;
       
       const newDoc: CarDocument = {
         id: Date.now().toString(),
@@ -428,25 +359,9 @@ const MyCars = () => {
     if (!selectedCar || !user || !carVerticalFile) return;
     
     try {
-      const fileExt = carVerticalFile.name.split('.').pop();
-      const fileName = `${user.id}/${selectedCar.id}/carvertical-${Date.now()}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('car-documents')
-        .upload(fileName, carVerticalFile);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('car-documents')
-        .getPublicUrl(fileName);
-      
       const newReport: CarVerticalReport = {
         id: Date.now().toString(),
-        file_url: publicUrl,
+        file_url: URL.createObjectURL(carVerticalFile),
         uploaded_at: new Date().toISOString()
       };
 
@@ -1145,20 +1060,15 @@ const MyCars = () => {
                                 <Button 
                                   onClick={async () => {
                                     try {
-                                      const { error } = await supabase
-                                        .from('cars')
-                                        .update({
-                                          make_id: newCar.make_id,
-                                          model_id: newCar.model_id,
-                                          year: newCar.year,
-                                          color: newCar.color || null,
-                                          license_plate: newCar.license_plate || null,
-                                          mileage: newCar.mileage ? parseInt(newCar.mileage) : null,
-                                          vin: newCar.vin || null
-                                        })
-                                        .eq('id', selectedCar?.id);
-
-                                      if (error) throw error;
+                                      await api.put(`/cars/${selectedCar?.id}`, {
+                                        makeId: newCar.make_id,
+                                        modelId: newCar.model_id,
+                                        year: newCar.year,
+                                        color: newCar.color || null,
+                                        licensePlate: newCar.license_plate || null,
+                                        mileage: newCar.mileage ? parseInt(newCar.mileage) : null,
+                                        vin: newCar.vin || null,
+                                      });
 
                                       toast({
                                         title: "Succes",

@@ -1,0 +1,82 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - list
+    - region "Notifications alt+T"
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - img
+          - navigation:
+            - button: Solicită Service
+            - button:
+              - img
+              - text: Solicitările Mele
+            - button:
+              - img
+              - text: Mașinile Mele
+          - generic:
+            - button:
+              - img
+              - generic: Marketplace Owner
+              - generic: (proprietar auto)
+      - main:
+        - generic:
+          - generic:
+            - generic:
+              - button:
+                - img
+                - text: Înapoi
+              - generic:
+                - heading [level=1]: Cererile Mele de Serviciu
+                - paragraph: Gestionează cererile și vezi ofertele
+            - button:
+              - img
+              - generic: Cerere Nouă
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - heading [level=3]: E2E Oil Change Request
+                    - paragraph:
+                      - img
+                      - text: București, null
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic: normal priority
+                        - generic: OPEN
+                    - button:
+                      - img
+                - paragraph: Full oil change and filter replacement for E2E test
+                - generic:
+                  - button [expanded]:
+                    - img
+                    - text: View Quotes (1)
+  - generic: "Checking: The quote shows $250 from the marketplace garage"
+  - 'dialog "Oferte pentru: E2E Oil Change Request" [ref=e2]':
+    - 'heading "Oferte pentru: E2E Oil Change Request" [level=2] [ref=e4]'
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - heading "E2E Auto Service" [level=4] [ref=e10]
+          - paragraph [ref=e11]: Cluj-Napoca
+          - paragraph [ref=e12]: "Rating: 0/5.0"
+        - generic [ref=e13]:
+          - paragraph [ref=e14]: $250
+          - generic [ref=e15]: PENDING
+      - paragraph [ref=e16]: Full synthetic oil change with OEM filter
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - text: 2 hours
+      - generic [ref=e22]:
+        - button "Accept Quote" [ref=e23] [cursor=pointer]
+        - button "Reject" [ref=e24] [cursor=pointer]
+    - button "Close" [active] [ref=e25] [cursor=pointer]:
+      - img [ref=e26]
+      - generic [ref=e29]: Close
+```

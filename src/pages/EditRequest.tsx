@@ -10,14 +10,12 @@ import { ArrowLeft, Car, MapPin } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 interface UserCar {
   id: string;
-  make_id: string;
-  model_id: string;
   year: number;
   vin: string | null;
   license_plate: string | null;
@@ -38,7 +36,7 @@ const EditRequest = () => {
     description: '',
     preferredDate: undefined as Date | undefined,
     location: '',
-    urgency: 'medium',
+    urgency: 'NORMAL',
     carId: ''
   });
 
@@ -52,17 +50,16 @@ const EditRequest = () => {
     try {
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from('cars')
-        .select(`
-          *,
-          car_makes(name),
-          car_models(name)
-        `)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setCars(data || []);
+      const data = await api.get<any[]>('/cars');
+      const mapped = (data || []).map((c: any) => ({
+        id: String(c.id),
+        year: c.year,
+        vin: c.vin,
+        license_plate: c.licensePlate,
+        car_makes: { name: c.makeName },
+        car_models: { name: c.modelName },
+      }));
+      setCars(mapped);
     } catch (error) {
       console.error('Error fetching cars:', error);
       toast({
@@ -76,23 +73,16 @@ const EditRequest = () => {
   const fetchJobRequest = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('job_requests')
-        .select('*')
-        .eq('id', jobId)
-        .eq('user_id', user?.id)
-        .single();
-
-      if (error) throw error;
+      const data = await api.get<any>(`/job-requests/${jobId}`);
 
       if (data) {
         setFormData({
           title: data.title || '',
           description: data.description || '',
-          preferredDate: data.preferred_date ? new Date(data.preferred_date) : undefined,
-          location: data.location_address || '',
-          urgency: data.urgency || 'medium',
-          carId: data.car_id || ''
+          preferredDate: data.preferredDate ? new Date(data.preferredDate) : undefined,
+          location: data.locationAddress || '',
+          urgency: data.urgency || 'NORMAL',
+          carId: data.carId != null ? String(data.carId) : ''
         });
       }
     } catch (error) {
@@ -121,20 +111,14 @@ const EditRequest = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('job_requests')
-        .update({
-          car_id: formData.carId,
-          title: formData.title,
-          description: formData.description,
-          preferred_date: formData.preferredDate?.toISOString().split('T')[0],
-          urgency: formData.urgency,
-          location_address: formData.location,
-        })
-        .eq('id', jobId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
+      await api.put(`/job-requests/${jobId}`, {
+        carId: parseInt(formData.carId),
+        title: formData.title,
+        description: formData.description,
+        preferredDate: formData.preferredDate?.toISOString().split('T')[0],
+        urgency: formData.urgency,
+        locationAddress: formData.location,
+      });
 
       toast({
         title: "Success",
@@ -261,9 +245,9 @@ const EditRequest = () => {
                 <Label>Urgența</Label>
                 <div className="flex gap-4">
                   {[
-                    { value: 'low', label: 'Nu e urgent', color: 'bg-green-100 text-green-800 border-green-300' },
-                    { value: 'medium', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
-                    { value: 'high', label: 'Urgent', color: 'bg-red-100 text-red-800 border-red-300' }
+                    { value: 'LOW', label: 'Nu e urgent', color: 'bg-green-100 text-green-800 border-green-300' },
+                    { value: 'NORMAL', label: 'Normal', color: 'bg-blue-100 text-blue-800 border-blue-300' },
+                    { value: 'HIGH', label: 'Urgent', color: 'bg-red-100 text-red-800 border-red-300' }
                   ].map((urgency) => (
                     <button
                       key={urgency.value}

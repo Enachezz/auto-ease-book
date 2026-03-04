@@ -64,6 +64,15 @@ public class GarageService {
                 .toList();
     }
 
+    @Transactional
+    public GarageResponse approveGarage(java.util.UUID garageId) {
+        Garage garage = garageRepository.findById(garageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+        garage.setIsApproved(true);
+        garage = garageRepository.save(garage);
+        return toResponse(garage);
+    }
+
     private GarageResponse toResponse(Garage garage) {
         return GarageResponse.builder()
                 .id(garage.getId())

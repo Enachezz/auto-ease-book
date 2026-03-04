@@ -1,5 +1,6 @@
 package com.api.auto_ease.config;
 
+import com.api.auto_ease.config.interceptor.EndpointInterceptor;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.time.LocalDateTime;
@@ -18,14 +20,16 @@ import java.time.format.DateTimeFormatter;
 @EnableScheduling
 public class BaseConfig implements WebMvcConfigurer {
 
-//    private HandlerInterceptor loggingInterceptor() {
-//        return new EndpointInterceptor();
-//    }
+    private final EndpointInterceptor endpointInterceptor;
 
-//    @Override
-//    public void addInterceptors(InterceptorRegistry interceptorRegistry) {
-//        interceptorRegistry.addInterceptor(loggingInterceptor());
-//    }
+    public BaseConfig(EndpointInterceptor endpointInterceptor) {
+        this.endpointInterceptor = endpointInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(endpointInterceptor);
+    }
 
     @Bean
     @Primary

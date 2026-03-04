@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/garages")
@@ -47,5 +48,11 @@ public class GarageController {
     @GetMapping
     public ResponseEntity<List<GarageResponse>> listApprovedGarages() {
         return ResponseEntity.ok(garageService.listApprovedGarages());
+    }
+
+    @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<GarageResponse> approveGarage(@PathVariable UUID id) {
+        return ResponseEntity.ok(garageService.approveGarage(id));
     }
 }

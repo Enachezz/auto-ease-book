@@ -69,6 +69,17 @@ public class JobRequestService {
         return toResponse(jobRequest, car);
     }
 
+    public JobRequestResponse getJobRequest(String userId, UUID id) {
+        JobRequest jobRequest = jobRequestRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
+
+        if (!jobRequest.getUserId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this job request");
+        }
+
+        return toResponse(jobRequest);
+    }
+
     public List<JobRequestResponse> getMyJobRequests(String userId) {
         return jobRequestRepository.findByUserIdOrderByCreatedDateDesc(userId).stream()
                 .map(this::toResponse)

@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Lock, Mail, Phone, Bell, FileCheck } from 'lucide-react';
 import { useState, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,11 +18,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [email, setEmail] = useState(profile?.email || '');
   const [phone, setPhone] = useState(profile?.phone || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [notifyValabilities, setNotifyValabilities] = useState(true);
   const [notifyMeetings, setNotifyMeetings] = useState(true);
   const [drivingLicense, setDrivingLicense] = useState<File | null>(null);
@@ -33,36 +29,10 @@ export default function Settings() {
     return null;
   }
 
-  const handleEmailUpdate = async () => {
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ email });
-      if (error) throw error;
-      
-      toast({
-        title: "Email actualizat",
-        description: "Verifică noul email pentru confirmare.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Eroare",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handlePhoneUpdate = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ phone })
-        .eq('user_id', user.id);
-      
-      if (error) throw error;
+      await api.put('/profiles/me', { phone });
       
       toast({
         title: "Telefon actualizat",
@@ -79,45 +49,11 @@ export default function Settings() {
     }
   };
 
-  const handlePasswordUpdate = async () => {
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Eroare",
-        description: "Parolele nu coincid.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
-      
-      toast({
-        title: "Parolă actualizată",
-        description: "Parola ta a fost schimbată cu succes.",
-      });
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-    } catch (error: any) {
-      toast({
-        title: "Eroare",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleDrivingLicenseUpload = async () => {
     if (!drivingLicense) return;
 
     setIsLoading(true);
     try {
-      // Upload logic will be implemented when storage bucket is created
       toast({
         title: "Funcție în dezvoltare",
         description: "Funcționalitatea de încărcare a permisului de conducere va fi disponibilă în curând.",
@@ -141,30 +77,27 @@ export default function Settings() {
           <p className="text-muted-foreground">Gestionează-ți contul și preferințele</p>
         </div>
 
-        {/* Account Information */}
+        {/* Email (read-only for now) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
               Email
             </CardTitle>
-            <CardDescription>Actualizează adresa ta de email</CardDescription>
+            <CardDescription>Adresa ta de email</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Adresa de Email</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
-                />
-                <Button onClick={handleEmailUpdate} disabled={isLoading}>
-                  Salvează
-                </Button>
-              </div>
+              <Input
+                id="email"
+                type="email"
+                value={profile.email}
+                disabled
+              />
+              <p className="text-xs text-muted-foreground">
+                Modificarea emailului va fi disponibilă într-o versiune viitoare.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -197,7 +130,7 @@ export default function Settings() {
           </CardContent>
         </Card>
 
-        {/* Password */}
+        {/* Password (deferred) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -207,29 +140,9 @@ export default function Settings() {
             <CardDescription>Schimbă parola contului tău</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Parolă Nouă</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirmă Parola</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
-            <Button onClick={handlePasswordUpdate} disabled={isLoading}>
-              Schimbă Parola
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Schimbarea parolei va fi disponibilă într-o versiune viitoare.
+            </p>
           </CardContent>
         </Card>
 

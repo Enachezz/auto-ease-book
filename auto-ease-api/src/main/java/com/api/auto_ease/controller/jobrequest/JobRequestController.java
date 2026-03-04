@@ -37,6 +37,14 @@ public class JobRequestController {
         return ResponseEntity.ok(jobRequestService.getMyJobRequests(userId));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('CAR_OWNER')")
+    public ResponseEntity<JobRequestResponse> getJobRequest(Authentication auth,
+                                                             @PathVariable UUID id) {
+        String userId = (String) auth.getPrincipal();
+        return ResponseEntity.ok(jobRequestService.getJobRequest(userId, id));
+    }
+
     @GetMapping("/open")
     @PreAuthorize("hasRole('GARAGE')")
     public ResponseEntity<List<JobRequestResponse>> getOpenJobRequests() {

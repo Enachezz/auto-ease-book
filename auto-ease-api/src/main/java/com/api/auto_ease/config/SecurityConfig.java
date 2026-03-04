@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/garages").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/garages/*/reviews").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

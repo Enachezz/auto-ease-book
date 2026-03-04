@@ -17,4 +17,6 @@ public interface QuoteRepository extends JpaRepository<Quote, UUID> {
     boolean existsByJobRequestIdAndGarageId(UUID jobRequestId, UUID garageId);
 
     int countByJobRequestId(UUID jobRequestId);
+
+    List<Quote> findByJobRequestId(UUID jobRequestId);
 }

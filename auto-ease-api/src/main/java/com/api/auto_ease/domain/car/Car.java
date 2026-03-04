@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,14 +19,17 @@ import java.time.LocalDate;
 @Table(name = "CAR")
 public class Car extends BaseEntity {
 
-    @Column(name = "make")
-    private String make;
+    @Column(name = "user_id")
+    private String userId;
 
-    @Column(name = "model")
-    private String model;
+    @Column(name = "make_id")
+    private UUID makeId;
 
-    @Column(name = "made")
-    private LocalDate made;
+    @Column(name = "model_id")
+    private UUID modelId;
+
+    @Column(name = "year")
+    private Integer year;
 
     @Column(name = "color")
     private String color;
@@ -34,9 +37,9 @@ public class Car extends BaseEntity {
     @Column(name = "license_plate")
     private String licensePlate;
 
-    @Column(name = "current_mileage")
-    private Integer currentMileage;
-
     @Column(name = "vin")
     private String vin;
+
+    @Column(name = "mileage")
+    private Integer mileage;
 }

@@ -1,0 +1,17 @@
+-- V5: Refactor CAR table for vehicle management.
+-- Replace free-text make/model with FK references, add owner link.
+
+ALTER TABLE CAR ADD COLUMN user_id VARCHAR(50);
+ALTER TABLE CAR ADD COLUMN make_id UUID;
+ALTER TABLE CAR ADD COLUMN model_id UUID;
+ALTER TABLE CAR ADD COLUMN year INTEGER;
+ALTER TABLE CAR ADD COLUMN mileage INTEGER;
+
+ALTER TABLE CAR DROP COLUMN make;
+ALTER TABLE CAR DROP COLUMN model;
+ALTER TABLE CAR DROP COLUMN made;
+ALTER TABLE CAR DROP COLUMN current_mileage;
+
+ALTER TABLE CAR ADD CONSTRAINT fk_car_user FOREIGN KEY (user_id) REFERENCES APP_USER(uuid);
+ALTER TABLE CAR ADD CONSTRAINT fk_car_make FOREIGN KEY (make_id) REFERENCES car_makes(id);
+ALTER TABLE CAR ADD CONSTRAINT fk_car_model FOREIGN KEY (model_id) REFERENCES car_models(id);

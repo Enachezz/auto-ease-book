@@ -22,7 +22,7 @@ import static java.time.LocalDateTime.now;
 public class Booking {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "quote_id", nullable = false, unique = true)
@@ -49,7 +49,6 @@ public class Booking {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         if (status == null) status = BookingStatus.CONFIRMED;
         modifiedDate = createdDate = now();
     }

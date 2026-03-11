@@ -20,7 +20,7 @@ import static java.time.LocalDateTime.now;
 public class ServiceCategory {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "name", nullable = false, length = 100)
@@ -40,7 +40,6 @@ public class ServiceCategory {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         modifiedDate = createdDate = now();
     }
 

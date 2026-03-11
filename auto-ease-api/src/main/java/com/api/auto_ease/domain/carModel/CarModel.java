@@ -20,7 +20,7 @@ import static java.time.LocalDateTime.now;
 public class CarModel {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "make_id", nullable = false)
@@ -34,7 +34,6 @@ public class CarModel {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         createdDate = now();
     }
 }

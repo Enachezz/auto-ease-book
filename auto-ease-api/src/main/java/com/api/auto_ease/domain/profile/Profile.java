@@ -20,7 +20,8 @@ import static java.time.LocalDateTime.now;
 public class Profile {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
+    @Column(updatable = false)
     private UUID id;
 
     @Column(name = "user_id", nullable = false, length = 50)
@@ -46,7 +47,6 @@ public class Profile {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         modifiedDate = createdDate = now();
     }
 

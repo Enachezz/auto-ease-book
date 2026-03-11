@@ -23,7 +23,8 @@ import static java.time.LocalDateTime.now;
 public class Quote {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
+    @Column(updatable = false)
     private UUID id;
 
     @Column(name = "job_request_id", nullable = false)
@@ -59,7 +60,6 @@ public class Quote {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         if (status == null) status = QuoteStatus.PENDING;
         modifiedDate = createdDate = now();
     }

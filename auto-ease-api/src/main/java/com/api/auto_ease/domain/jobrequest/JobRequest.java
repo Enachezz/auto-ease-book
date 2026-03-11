@@ -22,7 +22,8 @@ import static java.time.LocalDateTime.now;
 public class JobRequest {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
+    @Column(updatable = false)
     private UUID id;
 
     @Column(name = "user_id", nullable = false, length = 50)
@@ -74,7 +75,6 @@ public class JobRequest {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         if (urgency == null) urgency = Urgency.NORMAL;
         if (status == null) status = JobRequestStatus.OPEN;
         modifiedDate = createdDate = now();

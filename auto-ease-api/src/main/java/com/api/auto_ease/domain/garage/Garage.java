@@ -23,7 +23,8 @@ import static java.time.LocalDateTime.now;
 public class Garage {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
+    @Column(updatable = false)
     private UUID id;
 
     @Column(name = "user_id", nullable = false, length = 50)
@@ -71,7 +72,6 @@ public class Garage {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         if (isApproved == null) isApproved = false;
         if (averageRating == null) averageRating = BigDecimal.ZERO;
         if (totalReviews == null) totalReviews = 0;

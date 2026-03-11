@@ -20,7 +20,8 @@ import static java.time.LocalDateTime.now;
 public class Review {
 
     @Id
-    @Column(columnDefinition = "uuid", updatable = false)
+    @GeneratedValue
+    @Column(updatable = false)
     private UUID id;
 
     @Column(name = "booking_id", nullable = false, unique = true)
@@ -46,7 +47,6 @@ public class Review {
 
     @PrePersist
     void onPersist() {
-        if (id == null) id = UUID.randomUUID();
         modifiedDate = createdDate = now();
     }
 

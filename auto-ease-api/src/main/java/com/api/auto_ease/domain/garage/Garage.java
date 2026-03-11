@@ -72,9 +72,15 @@ public class Garage {
 
     @PrePersist
     void onPersist() {
-        if (isApproved == null) isApproved = false;
-        if (averageRating == null) averageRating = BigDecimal.ZERO;
-        if (totalReviews == null) totalReviews = 0;
+        if (isApproved == null) {
+            isApproved = false;
+        }
+        if (averageRating == null) {
+            averageRating = BigDecimal.ZERO;
+        }
+        if (totalReviews == null) {
+            totalReviews = 0;
+        }
         modifiedDate = createdDate = now();
     }
 

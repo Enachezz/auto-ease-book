@@ -49,7 +49,9 @@ public class Booking {
 
     @PrePersist
     void onPersist() {
-        if (status == null) status = BookingStatus.CONFIRMED;
+        if (status == null) {
+            status = BookingStatus.CONFIRMED;
+        }
         modifiedDate = createdDate = now();
     }
 

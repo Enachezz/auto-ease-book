@@ -75,8 +75,12 @@ public class JobRequest {
 
     @PrePersist
     void onPersist() {
-        if (urgency == null) urgency = Urgency.NORMAL;
-        if (status == null) status = JobRequestStatus.OPEN;
+        if (urgency == null) {
+            urgency = Urgency.NORMAL;
+        }
+        if (status == null) {
+            status = JobRequestStatus.OPEN;
+        }
         modifiedDate = createdDate = now();
     }
 

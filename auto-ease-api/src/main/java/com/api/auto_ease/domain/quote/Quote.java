@@ -58,7 +58,9 @@ public class Quote {
 
     @PrePersist
     void onPersist() {
-        if (status == null) status = QuoteStatus.PENDING;
+        if (status == null) {
+            status = QuoteStatus.PENDING;
+        }
         modifiedDate = createdDate = now();
     }
 

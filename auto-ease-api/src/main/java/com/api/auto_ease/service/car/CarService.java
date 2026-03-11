@@ -74,11 +74,21 @@ public class CarService {
             car.setModelId(request.getModelId());
         }
 
-        if (request.getYear() != null) car.setYear(request.getYear());
-        if (request.getColor() != null) car.setColor(request.getColor());
-        if (request.getLicensePlate() != null) car.setLicensePlate(request.getLicensePlate());
-        if (request.getVin() != null) car.setVin(request.getVin());
-        if (request.getMileage() != null) car.setMileage(request.getMileage());
+        if (request.getYear() != null) {
+            car.setYear(request.getYear());
+        }
+        if (request.getColor() != null) {
+            car.setColor(request.getColor());
+        }
+        if (request.getLicensePlate() != null) {
+            car.setLicensePlate(request.getLicensePlate());
+        }
+        if (request.getVin() != null) {
+            car.setVin(request.getVin());
+        }
+        if (request.getMileage() != null) {
+            car.setMileage(request.getMileage());
+        }
 
         car = carRepository.save(car);
 

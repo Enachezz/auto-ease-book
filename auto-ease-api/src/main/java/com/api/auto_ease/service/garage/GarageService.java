@@ -45,14 +45,30 @@ public class GarageService {
         Garage garage = garageRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
 
-        if (request.getBusinessName() != null) garage.setBusinessName(request.getBusinessName());
-        if (request.getAddress() != null) garage.setAddress(request.getAddress());
-        if (request.getCity() != null) garage.setCity(request.getCity());
-        if (request.getState() != null) garage.setState(request.getState());
-        if (request.getPostalCode() != null) garage.setPostalCode(request.getPostalCode());
-        if (request.getPhone() != null) garage.setPhone(request.getPhone());
-        if (request.getDescription() != null) garage.setDescription(request.getDescription());
-        if (request.getServices() != null) garage.setServices(request.getServices());
+        if (request.getBusinessName() != null) {
+            garage.setBusinessName(request.getBusinessName());
+        }
+        if (request.getAddress() != null) {
+            garage.setAddress(request.getAddress());
+        }
+        if (request.getCity() != null) {
+            garage.setCity(request.getCity());
+        }
+        if (request.getState() != null) {
+            garage.setState(request.getState());
+        }
+        if (request.getPostalCode() != null) {
+            garage.setPostalCode(request.getPostalCode());
+        }
+        if (request.getPhone() != null) {
+            garage.setPhone(request.getPhone());
+        }
+        if (request.getDescription() != null) {
+            garage.setDescription(request.getDescription());
+        }
+        if (request.getServices() != null) {
+            garage.setServices(request.getServices());
+        }
 
         garage = garageRepository.save(garage);
         return toResponse(garage);

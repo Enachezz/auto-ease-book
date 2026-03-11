@@ -80,21 +80,29 @@ public class BookingService {
         List<BookingResponse> garageBookings = getGarageBookings(userId);
 
         Map<UUID, BookingResponse> merged = new LinkedHashMap<>();
-        for (BookingResponse bookingResponse : ownerBookings) merged.put(bookingResponse.getId(), bookingResponse);
-        for (BookingResponse bookingResponse : garageBookings) merged.put(bookingResponse.getId(), bookingResponse);
+        for (BookingResponse bookingResponse : ownerBookings) {
+            merged.put(bookingResponse.getId(), bookingResponse);
+        }
+        for (BookingResponse bookingResponse : garageBookings) {
+            merged.put(bookingResponse.getId(), bookingResponse);
+        }
 
         return new ArrayList<>(merged.values());
     }
 
     private List<BookingResponse> getOwnerBookings(String userId) {
         List<JobRequest> jobRequests = jobRequestRepository.findByUserIdOrderByCreatedDateDesc(userId);
-        if (jobRequests.isEmpty()) return List.of();
+        if (jobRequests.isEmpty()) {
+            return List.of();
+        }
 
         List<UUID> quoteIds = jobRequests.stream()
                 .flatMap(jobRequest -> quoteRepository.findByJobRequestId(jobRequest.getId()).stream())
                 .map(Quote::getId)
                 .toList();
-        if (quoteIds.isEmpty()) return List.of();
+        if (quoteIds.isEmpty()) {
+            return List.of();
+        }
 
         Map<UUID, JobRequest> jobRequestByQuoteId = new HashMap<>();
         Map<UUID, Quote> quoteById = new HashMap<>();
@@ -117,11 +125,15 @@ public class BookingService {
 
     private List<BookingResponse> getGarageBookings(String userId) {
         Optional<Garage> garageOpt = garageRepository.findByUserId(userId);
-        if (garageOpt.isEmpty()) return List.of();
+        if (garageOpt.isEmpty()) {
+            return List.of();
+        }
 
         Garage garage = garageOpt.get();
         List<Quote> quotes = quoteRepository.findByGarageIdOrderByCreatedDateDesc(garage.getId());
-        if (quotes.isEmpty()) return List.of();
+        if (quotes.isEmpty()) {
+            return List.of();
+        }
 
         List<UUID> quoteIds = quotes.stream().map(Quote::getId).toList();
         Map<UUID, Quote> quoteById = new HashMap<>();

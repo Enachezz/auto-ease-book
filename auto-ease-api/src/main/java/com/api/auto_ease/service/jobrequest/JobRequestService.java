@@ -110,8 +110,12 @@ public class JobRequestService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid category ID"));
             jobRequest.setCategoryId(request.getCategoryId());
         }
-        if (request.getTitle() != null) jobRequest.setTitle(request.getTitle());
-        if (request.getDescription() != null) jobRequest.setDescription(request.getDescription());
+        if (request.getTitle() != null) {
+            jobRequest.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            jobRequest.setDescription(request.getDescription());
+        }
         if (request.getUrgency() != null) {
             try {
                 jobRequest.setUrgency(Urgency.valueOf(request.getUrgency()));
@@ -119,12 +123,24 @@ public class JobRequestService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid urgency value");
             }
         }
-        if (request.getPreferredDate() != null) jobRequest.setPreferredDate(request.getPreferredDate());
-        if (request.getBudgetMin() != null) jobRequest.setBudgetMin(request.getBudgetMin());
-        if (request.getBudgetMax() != null) jobRequest.setBudgetMax(request.getBudgetMax());
-        if (request.getLocationAddress() != null) jobRequest.setLocationAddress(request.getLocationAddress());
-        if (request.getLocationCity() != null) jobRequest.setLocationCity(request.getLocationCity());
-        if (request.getLocationState() != null) jobRequest.setLocationState(request.getLocationState());
+        if (request.getPreferredDate() != null) {
+            jobRequest.setPreferredDate(request.getPreferredDate());
+        }
+        if (request.getBudgetMin() != null) {
+            jobRequest.setBudgetMin(request.getBudgetMin());
+        }
+        if (request.getBudgetMax() != null) {
+            jobRequest.setBudgetMax(request.getBudgetMax());
+        }
+        if (request.getLocationAddress() != null) {
+            jobRequest.setLocationAddress(request.getLocationAddress());
+        }
+        if (request.getLocationCity() != null) {
+            jobRequest.setLocationCity(request.getLocationCity());
+        }
+        if (request.getLocationState() != null) {
+            jobRequest.setLocationState(request.getLocationState());
+        }
 
         jobRequest = jobRequestRepository.save(jobRequest);
         return toResponse(jobRequest);

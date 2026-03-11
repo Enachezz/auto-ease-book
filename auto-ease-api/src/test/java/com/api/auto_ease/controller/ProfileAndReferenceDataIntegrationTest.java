@@ -110,8 +110,8 @@ class ProfileAndReferenceDataIntegrationTest {
         List<Map<String, Object>> makes = makesResp.getBody();
 
         String toyotaId = makes.stream()
-                .filter(m -> "Toyota".equals(m.get("name")))
-                .map(m -> m.get("id").toString())
+                .filter(make -> "Toyota".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Toyota not found in car makes"));
 
@@ -121,7 +121,7 @@ class ProfileAndReferenceDataIntegrationTest {
         assertNotNull(models);
         assertEquals(5, models.size());
 
-        List<String> modelNames = models.stream().map(m -> (String) m.get("name")).toList();
+        List<String> modelNames = models.stream().map(model -> (String) model.get("name")).toList();
         assertTrue(modelNames.contains("Camry"));
         assertTrue(modelNames.contains("Corolla"));
         assertTrue(modelNames.contains("RAV4"));

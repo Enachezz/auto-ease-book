@@ -79,7 +79,7 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByGarageIdOrderByCreatedDateDesc(garageId);
         int totalReviews = reviews.size();
         BigDecimal avgRating = reviews.stream()
-                .map(r -> BigDecimal.valueOf(r.getRating()))
+                .map(review -> BigDecimal.valueOf(review.getRating()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(BigDecimal.valueOf(totalReviews), 2, RoundingMode.HALF_UP);
 

@@ -22,14 +22,14 @@ public class CarMakeController {
     @GetMapping("/api/car-makes")
     public List<CarMakeResponse> listMakes() {
         return carMakeRepository.findAllByOrderByNameAsc().stream()
-                .map(m -> new CarMakeResponse(m.getId(), m.getName()))
+                .map(make -> new CarMakeResponse(make.getId(), make.getName()))
                 .toList();
     }
 
     @GetMapping("/api/car-makes/{makeId}/models")
     public List<CarModelResponse> listModels(@PathVariable UUID makeId) {
         return carModelRepository.findByMakeIdOrderByNameAsc(makeId).stream()
-                .map(m -> new CarModelResponse(m.getId(), m.getMakeId(), m.getName()))
+                .map(model -> new CarModelResponse(model.getId(), model.getMakeId(), model.getName()))
                 .toList();
     }
 }

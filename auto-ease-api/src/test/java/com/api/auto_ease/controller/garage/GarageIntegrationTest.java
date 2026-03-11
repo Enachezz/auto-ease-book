@@ -153,8 +153,8 @@ class GarageIntegrationTest {
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         List<Map<String, Object>> garages = resp.getBody();
         assertNotNull(garages);
-        for (Map<String, Object> g : garages) {
-            assertEquals(true, g.get("isApproved"));
+        for (Map<String, Object> garage : garages) {
+            assertEquals(true, garage.get("isApproved"));
         }
     }
 
@@ -167,8 +167,8 @@ class GarageIntegrationTest {
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         List<Map<String, Object>> garages = resp.getBody();
         assertNotNull(garages);
-        for (Map<String, Object> g : garages) {
-            assertEquals(true, g.get("isApproved"));
+        for (Map<String, Object> garage : garages) {
+            assertEquals(true, garage.get("isApproved"));
         }
     }
 

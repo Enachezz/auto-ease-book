@@ -142,12 +142,12 @@ public class JobRequestService {
         jobRequestRepository.delete(jobRequest);
     }
 
-    private JobRequestResponse toResponse(JobRequest jr) {
-        Car car = carRepository.findById(jr.getCarId()).orElse(null);
-        return toResponse(jr, car);
+    private JobRequestResponse toResponse(JobRequest jobRequest) {
+        Car car = carRepository.findById(jobRequest.getCarId()).orElse(null);
+        return toResponse(jobRequest, car);
     }
 
-    private JobRequestResponse toResponse(JobRequest jr, Car car) {
+    private JobRequestResponse toResponse(JobRequest jobRequest, Car car) {
         String makeName = "Unknown";
         String modelName = "Unknown";
         Integer carYear = null;
@@ -159,31 +159,31 @@ public class JobRequestService {
         }
 
         String categoryName = null;
-        if (jr.getCategoryId() != null) {
-            categoryName = serviceCategoryRepository.findById(jr.getCategoryId())
+        if (jobRequest.getCategoryId() != null) {
+            categoryName = serviceCategoryRepository.findById(jobRequest.getCategoryId())
                     .map(ServiceCategory::getName).orElse(null);
         }
 
-        int quoteCount = quoteRepository.countByJobRequestId(jr.getId());
+        int quoteCount = quoteRepository.countByJobRequestId(jobRequest.getId());
 
         return JobRequestResponse.builder()
-                .id(jr.getId())
-                .carId(jr.getCarId())
+                .id(jobRequest.getId())
+                .carId(jobRequest.getCarId())
                 .makeName(makeName)
                 .modelName(modelName)
                 .carYear(carYear)
-                .categoryId(jr.getCategoryId())
+                .categoryId(jobRequest.getCategoryId())
                 .categoryName(categoryName)
-                .title(jr.getTitle())
-                .description(jr.getDescription())
-                .urgency(jr.getUrgency().name())
-                .preferredDate(jr.getPreferredDate())
-                .budgetMin(jr.getBudgetMin())
-                .budgetMax(jr.getBudgetMax())
-                .status(jr.getStatus().name())
-                .locationAddress(jr.getLocationAddress())
-                .locationCity(jr.getLocationCity())
-                .locationState(jr.getLocationState())
+                .title(jobRequest.getTitle())
+                .description(jobRequest.getDescription())
+                .urgency(jobRequest.getUrgency().name())
+                .preferredDate(jobRequest.getPreferredDate())
+                .budgetMin(jobRequest.getBudgetMin())
+                .budgetMax(jobRequest.getBudgetMax())
+                .status(jobRequest.getStatus().name())
+                .locationAddress(jobRequest.getLocationAddress())
+                .locationCity(jobRequest.getLocationCity())
+                .locationState(jobRequest.getLocationState())
                 .quoteCount(quoteCount)
                 .build();
     }

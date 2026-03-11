@@ -56,8 +56,8 @@ class CarIntegrationTest {
         List<Map<String, Object>> makes = makesResp.getBody();
 
         toyotaMakeId = makes.stream()
-                .filter(m -> "Toyota".equals(m.get("name")))
-                .map(m -> m.get("id").toString())
+                .filter(make -> "Toyota".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Toyota not found"));
 
@@ -66,14 +66,14 @@ class CarIntegrationTest {
         List<Map<String, Object>> models = modelsResp.getBody();
 
         corollaModelId = models.stream()
-                .filter(m -> "Corolla".equals(m.get("name")))
-                .map(m -> m.get("id").toString())
+                .filter(model -> "Corolla".equals(model.get("name")))
+                .map(model -> model.get("id").toString())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Corolla not found"));
 
         camryModelId = models.stream()
-                .filter(m -> "Camry".equals(m.get("name")))
-                .map(m -> m.get("id").toString())
+                .filter(model -> "Camry".equals(model.get("name")))
+                .map(model -> model.get("id").toString())
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Camry not found"));
     }

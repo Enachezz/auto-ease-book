@@ -70,7 +70,7 @@ public class QuoteService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
 
         return quoteRepository.findByGarageIdOrderByCreatedDateDesc(garage.getId()).stream()
-                .map(q -> toResponse(q, garage))
+                .map(quote -> toResponse(quote, garage))
                 .toList();
     }
 

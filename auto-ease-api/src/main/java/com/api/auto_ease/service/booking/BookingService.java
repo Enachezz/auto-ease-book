@@ -55,8 +55,8 @@ public class BookingService {
 
         List<Quote> allQuotes = quoteRepository.findByJobRequestId(jobRequest.getId());
         List<Quote> toReject = allQuotes.stream()
-                .filter(q -> !q.getId().equals(quoteId))
-                .peek(q -> q.setStatus(QuoteStatus.REJECTED))
+                .filter(otherQuote -> !otherQuote.getId().equals(quoteId))
+                .peek(otherQuote -> otherQuote.setStatus(QuoteStatus.REJECTED))
                 .toList();
         quoteRepository.saveAll(toReject);
 
@@ -80,8 +80,8 @@ public class BookingService {
         List<BookingResponse> garageBookings = getGarageBookings(userId);
 
         Map<UUID, BookingResponse> merged = new LinkedHashMap<>();
-        for (BookingResponse b : ownerBookings) merged.put(b.getId(), b);
-        for (BookingResponse b : garageBookings) merged.put(b.getId(), b);
+        for (BookingResponse bookingResponse : ownerBookings) merged.put(bookingResponse.getId(), bookingResponse);
+        for (BookingResponse bookingResponse : garageBookings) merged.put(bookingResponse.getId(), bookingResponse);
 
         return new ArrayList<>(merged.values());
     }
@@ -91,26 +91,26 @@ public class BookingService {
         if (jobRequests.isEmpty()) return List.of();
 
         List<UUID> quoteIds = jobRequests.stream()
-                .flatMap(jr -> quoteRepository.findByJobRequestId(jr.getId()).stream())
+                .flatMap(jobRequest -> quoteRepository.findByJobRequestId(jobRequest.getId()).stream())
                 .map(Quote::getId)
                 .toList();
         if (quoteIds.isEmpty()) return List.of();
 
-        Map<UUID, JobRequest> jrByQuoteJobRequestId = new HashMap<>();
+        Map<UUID, JobRequest> jobRequestByQuoteId = new HashMap<>();
         Map<UUID, Quote> quoteById = new HashMap<>();
-        for (JobRequest jr : jobRequests) {
-            for (Quote q : quoteRepository.findByJobRequestId(jr.getId())) {
-                quoteById.put(q.getId(), q);
-                jrByQuoteJobRequestId.put(q.getId(), jr);
+        for (JobRequest jobRequest : jobRequests) {
+            for (Quote quote : quoteRepository.findByJobRequestId(jobRequest.getId())) {
+                quoteById.put(quote.getId(), quote);
+                jobRequestByQuoteId.put(quote.getId(), jobRequest);
             }
         }
 
         return bookingRepository.findByQuoteIdIn(quoteIds).stream()
                 .map(booking -> {
-                    Quote q = quoteById.get(booking.getQuoteId());
-                    JobRequest jr = jrByQuoteJobRequestId.get(booking.getQuoteId());
-                    Garage g = q != null ? garageRepository.findById(q.getGarageId()).orElse(null) : null;
-                    return toResponse(booking, q, jr, g);
+                    Quote quote = quoteById.get(booking.getQuoteId());
+                    JobRequest jobRequest = jobRequestByQuoteId.get(booking.getQuoteId());
+                    Garage garage = quote != null ? garageRepository.findById(quote.getGarageId()).orElse(null) : null;
+                    return toResponse(booking, quote, jobRequest, garage);
                 })
                 .toList();
     }
@@ -125,13 +125,13 @@ public class BookingService {
 
         List<UUID> quoteIds = quotes.stream().map(Quote::getId).toList();
         Map<UUID, Quote> quoteById = new HashMap<>();
-        quotes.forEach(q -> quoteById.put(q.getId(), q));
+        quotes.forEach(quote -> quoteById.put(quote.getId(), quote));
 
         return bookingRepository.findByQuoteIdIn(quoteIds).stream()
                 .map(booking -> {
-                    Quote q = quoteById.get(booking.getQuoteId());
-                    JobRequest jr = q != null ? jobRequestRepository.findById(q.getJobRequestId()).orElse(null) : null;
-                    return toResponse(booking, q, jr, garage);
+                    Quote quote = quoteById.get(booking.getQuoteId());
+                    JobRequest jobRequest = quote != null ? jobRequestRepository.findById(quote.getJobRequestId()).orElse(null) : null;
+                    return toResponse(booking, quote, jobRequest, garage);
                 })
                 .toList();
     }

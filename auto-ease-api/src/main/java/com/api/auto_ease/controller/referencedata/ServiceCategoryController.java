@@ -17,7 +17,7 @@ public class ServiceCategoryController {
     @GetMapping("/api/service-categories")
     public List<ServiceCategoryResponse> listCategories() {
         return serviceCategoryRepository.findAllByOrderByNameAsc().stream()
-                .map(c -> new ServiceCategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getIcon()))
+                .map(category -> new ServiceCategoryResponse(category.getId(), category.getName(), category.getDescription(), category.getIcon()))
                 .toList();
     }
 }

@@ -17,9 +17,7 @@ import static java.time.LocalDateTime.now;
 @Getter
 @Setter
 @Entity
-@Table(name = "quotes", uniqueConstraints =
-    @UniqueConstraint(columnNames = {"job_request_id", "garage_id"})
-)
+@Table(name = "quotes")
 public class Quote {
 
     @Id

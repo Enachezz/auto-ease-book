@@ -31,32 +31,32 @@ public class JobRequestController {
 
     @GetMapping("/api/job-requests")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<List<JobRequestResponse>> getMyJobRequests(Authentication auth) {
+    public List<JobRequestResponse> getMyJobRequests(Authentication auth) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(jobRequestService.getMyJobRequests(userId));
+        return jobRequestService.getMyJobRequests(userId);
     }
 
     @GetMapping("/api/job-requests/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<JobRequestResponse> getJobRequest(Authentication auth,
-                                                             @PathVariable UUID id) {
+    public JobRequestResponse getJobRequest(Authentication auth,
+                                             @PathVariable UUID id) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(jobRequestService.getJobRequest(userId, id));
+        return jobRequestService.getJobRequest(userId, id);
     }
 
     @GetMapping("/api/job-requests/open")
     @PreAuthorize("hasRole('GARAGE')")
-    public ResponseEntity<List<JobRequestResponse>> getOpenJobRequests() {
-        return ResponseEntity.ok(jobRequestService.getOpenJobRequests());
+    public List<JobRequestResponse> getOpenJobRequests() {
+        return jobRequestService.getOpenJobRequests();
     }
 
     @PutMapping("/api/job-requests/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<JobRequestResponse> updateJobRequest(Authentication auth,
-                                                                @PathVariable UUID id,
-                                                                @RequestBody UpdateJobRequestRequest request) {
+    public JobRequestResponse updateJobRequest(Authentication auth,
+                                                @PathVariable UUID id,
+                                                @RequestBody UpdateJobRequestRequest request) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(jobRequestService.updateJobRequest(userId, id, request));
+        return jobRequestService.updateJobRequest(userId, id, request);
     }
 
     @DeleteMapping("/api/job-requests/{id}")

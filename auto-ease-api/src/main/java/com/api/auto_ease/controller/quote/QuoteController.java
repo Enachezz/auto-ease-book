@@ -31,16 +31,16 @@ public class QuoteController {
 
     @GetMapping("/api/job-requests/{jobRequestId}/quotes")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<List<QuoteResponse>> getQuotesForRequest(Authentication auth,
-                                                                    @PathVariable UUID jobRequestId) {
+    public List<QuoteResponse> getQuotesForRequest(Authentication auth,
+                                                   @PathVariable UUID jobRequestId) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(quoteService.getQuotesForRequest(userId, jobRequestId));
+        return quoteService.getQuotesForRequest(userId, jobRequestId);
     }
 
     @GetMapping("/api/quotes/mine")
     @PreAuthorize("hasRole('GARAGE')")
-    public ResponseEntity<List<QuoteResponse>> getMyQuotes(Authentication auth) {
+    public List<QuoteResponse> getMyQuotes(Authentication auth) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(quoteService.getMyQuotes(userId));
+        return quoteService.getMyQuotes(userId);
     }
 }

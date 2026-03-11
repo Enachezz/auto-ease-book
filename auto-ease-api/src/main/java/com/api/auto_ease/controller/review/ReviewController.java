@@ -31,7 +31,7 @@ public class ReviewController {
     }
 
     @GetMapping("/api/garages/{garageId}/reviews")
-    public ResponseEntity<List<ReviewResponse>> getReviewsForGarage(@PathVariable UUID garageId) {
-        return ResponseEntity.ok(reviewService.getReviewsForGarage(garageId));
+    public List<ReviewResponse> getReviewsForGarage(@PathVariable UUID garageId) {
+        return reviewService.getReviewsForGarage(garageId);
     }
 }

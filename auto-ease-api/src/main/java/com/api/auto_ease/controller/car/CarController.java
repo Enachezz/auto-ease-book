@@ -30,18 +30,18 @@ public class CarController {
 
     @GetMapping("/api/cars")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<List<CarResponse>> getMyCars(Authentication auth) {
+    public List<CarResponse> getMyCars(Authentication auth) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(carService.getMyCars(userId));
+        return carService.getMyCars(userId);
     }
 
     @PutMapping("/api/cars/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public ResponseEntity<CarResponse> updateCar(Authentication auth,
-                                                 @PathVariable Integer id,
-                                                 @RequestBody UpdateCarRequest request) {
+    public CarResponse updateCar(Authentication auth,
+                                 @PathVariable Integer id,
+                                 @RequestBody UpdateCarRequest request) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(carService.updateCar(userId, id, request));
+        return carService.updateCar(userId, id, request);
     }
 
     @DeleteMapping("/api/cars/{id}")

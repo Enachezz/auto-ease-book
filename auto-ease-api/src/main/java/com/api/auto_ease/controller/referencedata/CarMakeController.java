@@ -5,7 +5,6 @@ import com.api.auto_ease.dto.referencedata.CarModelResponse;
 import com.api.auto_ease.repository.carMake.CarMakeRepository;
 import com.api.auto_ease.repository.carModel.CarModelRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,18 +20,16 @@ public class CarMakeController {
     private final CarModelRepository carModelRepository;
 
     @GetMapping("/api/car-makes")
-    public ResponseEntity<List<CarMakeResponse>> listMakes() {
-        List<CarMakeResponse> makes = carMakeRepository.findAllByOrderByNameAsc().stream()
+    public List<CarMakeResponse> listMakes() {
+        return carMakeRepository.findAllByOrderByNameAsc().stream()
                 .map(m -> new CarMakeResponse(m.getId(), m.getName()))
                 .toList();
-        return ResponseEntity.ok(makes);
     }
 
     @GetMapping("/api/car-makes/{makeId}/models")
-    public ResponseEntity<List<CarModelResponse>> listModels(@PathVariable UUID makeId) {
-        List<CarModelResponse> models = carModelRepository.findByMakeIdOrderByNameAsc(makeId).stream()
+    public List<CarModelResponse> listModels(@PathVariable UUID makeId) {
+        return carModelRepository.findByMakeIdOrderByNameAsc(makeId).stream()
                 .map(m -> new CarModelResponse(m.getId(), m.getMakeId(), m.getName()))
                 .toList();
-        return ResponseEntity.ok(models);
     }
 }

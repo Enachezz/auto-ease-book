@@ -30,8 +30,8 @@ public class BookingController {
     }
 
     @GetMapping("/api/bookings")
-    public ResponseEntity<List<BookingResponse>> getMyBookings(Authentication auth) {
+    public List<BookingResponse> getMyBookings(Authentication auth) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(bookingService.getMyBookings(userId));
+        return bookingService.getMyBookings(userId);
     }
 }

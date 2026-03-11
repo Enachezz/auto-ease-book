@@ -31,27 +31,27 @@ public class GarageController {
 
     @GetMapping("/api/garages/me")
     @PreAuthorize("hasRole('GARAGE')")
-    public ResponseEntity<GarageResponse> getMyGarage(Authentication auth) {
+    public GarageResponse getMyGarage(Authentication auth) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(garageService.getMyGarage(userId));
+        return garageService.getMyGarage(userId);
     }
 
     @PutMapping("/api/garages/me")
     @PreAuthorize("hasRole('GARAGE')")
-    public ResponseEntity<GarageResponse> updateMyGarage(Authentication auth,
-                                                         @RequestBody UpdateGarageRequest request) {
+    public GarageResponse updateMyGarage(Authentication auth,
+                                         @RequestBody UpdateGarageRequest request) {
         String userId = (String) auth.getPrincipal();
-        return ResponseEntity.ok(garageService.updateGarage(userId, request));
+        return garageService.updateGarage(userId, request);
     }
 
     @GetMapping("/api/garages")
-    public ResponseEntity<List<GarageResponse>> listApprovedGarages() {
-        return ResponseEntity.ok(garageService.listApprovedGarages());
+    public List<GarageResponse> listApprovedGarages() {
+        return garageService.listApprovedGarages();
     }
 
     @PatchMapping("/api/garages/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<GarageResponse> approveGarage(@PathVariable UUID id) {
-        return ResponseEntity.ok(garageService.approveGarage(id));
+    public GarageResponse approveGarage(@PathVariable UUID id) {
+        return garageService.approveGarage(id);
     }
 }

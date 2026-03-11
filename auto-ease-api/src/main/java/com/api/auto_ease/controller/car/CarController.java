@@ -15,13 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cars")
 @RequiredArgsConstructor
 public class CarController {
 
     private final CarService carService;
 
-    @PostMapping
+    @PostMapping("/api/cars")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<CarResponse> addCar(Authentication auth,
                                               @Valid @RequestBody CreateCarRequest request) {
@@ -29,14 +28,14 @@ public class CarController {
         return ResponseEntity.status(HttpStatus.CREATED).body(carService.addCar(userId, request));
     }
 
-    @GetMapping
+    @GetMapping("/api/cars")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<List<CarResponse>> getMyCars(Authentication auth) {
         String userId = (String) auth.getPrincipal();
         return ResponseEntity.ok(carService.getMyCars(userId));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/api/cars/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<CarResponse> updateCar(Authentication auth,
                                                  @PathVariable Integer id,
@@ -45,7 +44,7 @@ public class CarController {
         return ResponseEntity.ok(carService.updateCar(userId, id, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/cars/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<Void> deleteCar(Authentication auth,
                                           @PathVariable Integer id) {

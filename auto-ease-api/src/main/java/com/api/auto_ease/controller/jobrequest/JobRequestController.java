@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/job-requests")
 @RequiredArgsConstructor
 public class JobRequestController {
 
     private final JobRequestService jobRequestService;
 
-    @PostMapping
+    @PostMapping("/api/job-requests")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<JobRequestResponse> createJobRequest(Authentication auth,
                                                                 @Valid @RequestBody CreateJobRequestRequest request) {
@@ -30,14 +29,14 @@ public class JobRequestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(jobRequestService.createJobRequest(userId, request));
     }
 
-    @GetMapping
+    @GetMapping("/api/job-requests")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<List<JobRequestResponse>> getMyJobRequests(Authentication auth) {
         String userId = (String) auth.getPrincipal();
         return ResponseEntity.ok(jobRequestService.getMyJobRequests(userId));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/job-requests/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<JobRequestResponse> getJobRequest(Authentication auth,
                                                              @PathVariable UUID id) {
@@ -45,13 +44,13 @@ public class JobRequestController {
         return ResponseEntity.ok(jobRequestService.getJobRequest(userId, id));
     }
 
-    @GetMapping("/open")
+    @GetMapping("/api/job-requests/open")
     @PreAuthorize("hasRole('GARAGE')")
     public ResponseEntity<List<JobRequestResponse>> getOpenJobRequests() {
         return ResponseEntity.ok(jobRequestService.getOpenJobRequests());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/api/job-requests/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<JobRequestResponse> updateJobRequest(Authentication auth,
                                                                 @PathVariable UUID id,
@@ -60,7 +59,7 @@ public class JobRequestController {
         return ResponseEntity.ok(jobRequestService.updateJobRequest(userId, id, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/job-requests/{id}")
     @PreAuthorize("hasRole('CAR_OWNER')")
     public ResponseEntity<Void> deleteJobRequest(Authentication auth,
                                                   @PathVariable UUID id) {

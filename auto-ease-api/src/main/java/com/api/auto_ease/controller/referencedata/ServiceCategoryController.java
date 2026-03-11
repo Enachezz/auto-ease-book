@@ -5,19 +5,17 @@ import com.api.auto_ease.repository.serviceCategory.ServiceCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/service-categories")
 @RequiredArgsConstructor
 public class ServiceCategoryController {
 
     private final ServiceCategoryRepository serviceCategoryRepository;
 
-    @GetMapping
+    @GetMapping("/api/service-categories")
     public ResponseEntity<List<ServiceCategoryResponse>> listCategories() {
         List<ServiceCategoryResponse> categories = serviceCategoryRepository.findAllByOrderByNameAsc().stream()
                 .map(c -> new ServiceCategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getIcon()))

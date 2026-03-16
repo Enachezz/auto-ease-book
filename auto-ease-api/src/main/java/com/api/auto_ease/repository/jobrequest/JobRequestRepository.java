@@ -16,4 +16,6 @@ public interface JobRequestRepository extends JpaRepository<JobRequest, UUID> {
     List<JobRequest> findByStatusOrderByCreatedDateDesc(JobRequestStatus status);
 
     List<JobRequest> findByStatusAndCategoryIdOrderByCreatedDateDesc(JobRequestStatus status, UUID categoryId);
+
+    List<JobRequest> findByUserIdAndCategoryIdOrderByCreatedDateDesc(String userId, UUID categoryId);
 }

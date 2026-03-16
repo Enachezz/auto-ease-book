@@ -31,9 +31,10 @@ public class JobRequestController {
 
     @GetMapping("/api/job-requests")
     @PreAuthorize("hasRole('CAR_OWNER')")
-    public List<JobRequestResponse> getMyJobRequests(Authentication auth) {
+    public List<JobRequestResponse> getMyJobRequests(Authentication auth,
+                                                      @RequestParam(required = false) UUID categoryId) {
         String userId = (String) auth.getPrincipal();
-        return jobRequestService.getMyJobRequests(userId);
+        return jobRequestService.getMyJobRequests(userId, categoryId);
     }
 
     @GetMapping("/api/job-requests/{id}")

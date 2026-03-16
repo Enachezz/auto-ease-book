@@ -80,8 +80,14 @@ public class JobRequestService {
         return toResponse(jobRequest);
     }
 
-    public List<JobRequestResponse> getMyJobRequests(String userId) {
-        return jobRequestRepository.findByUserIdOrderByCreatedDateDesc(userId).stream()
+    public List<JobRequestResponse> getMyJobRequests(String userId, UUID categoryId) {
+        List<JobRequest> jobRequests;
+        if (categoryId != null) {
+            jobRequests = jobRequestRepository.findByUserIdAndCategoryIdOrderByCreatedDateDesc(userId, categoryId);
+        } else {
+            jobRequests = jobRequestRepository.findByUserIdOrderByCreatedDateDesc(userId);
+        }
+        return jobRequests.stream()
                 .map(this::toResponse)
                 .toList();
     }

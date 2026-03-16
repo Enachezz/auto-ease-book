@@ -86,8 +86,15 @@ public class JobRequestService {
                 .toList();
     }
 
-    public List<JobRequestResponse> getOpenJobRequests() {
-        return jobRequestRepository.findByStatusOrderByCreatedDateDesc(JobRequestStatus.OPEN).stream()
+    public List<JobRequestResponse> getOpenJobRequests(UUID categoryId) {
+        List<JobRequest> jobRequests;
+        if (categoryId != null) {
+            jobRequests = jobRequestRepository.findByStatusAndCategoryIdOrderByCreatedDateDesc(JobRequestStatus.OPEN, categoryId);
+        } else {
+            jobRequests = jobRequestRepository.findByStatusOrderByCreatedDateDesc(JobRequestStatus.OPEN);
+        }
+
+        return jobRequests.stream()
                 .map(this::toResponse)
                 .toList();
     }

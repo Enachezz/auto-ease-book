@@ -145,12 +145,6 @@ export default function Auth() {
                             Service/Mecanic
                           </div>
                         </SelectItem>
-                        <SelectItem value="admin">
-                          <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4" />
-                            Admin
-                          </div>
-                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

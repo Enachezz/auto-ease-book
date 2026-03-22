@@ -1,5 +1,6 @@
 package com.api.auto_ease.dto.auth;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.api.auto_ease.domain.appUser.AppUserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthResponse {
 
     private String token;

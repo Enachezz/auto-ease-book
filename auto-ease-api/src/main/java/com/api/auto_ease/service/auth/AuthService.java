@@ -1,6 +1,7 @@
 package com.api.auto_ease.service.auth;
 
 import com.api.auto_ease.domain.appUser.AppUser;
+import com.api.auto_ease.domain.appUser.AppUserType;
 import com.api.auto_ease.domain.profile.Profile;
 import com.api.auto_ease.dto.auth.AuthResponse;
 import com.api.auto_ease.dto.auth.LoginRequest;
@@ -27,7 +28,14 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (appUserRepository.existsByEmail(request.getEmail())) {
+        if (request.getUserType() == AppUserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin accounts cannot be registered via the API");
+        }
+        var existingOpt = appUserRepository.findByEmail(request.getEmail());
+        if (existingOpt.isPresent()) {
+            if (existingOpt.get().getType() == AppUserType.ADMIN) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Registration not allowed");
+            }
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 

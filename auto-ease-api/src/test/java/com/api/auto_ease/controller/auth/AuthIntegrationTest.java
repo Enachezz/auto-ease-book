@@ -53,6 +53,44 @@ class AuthIntegrationTest {
     }
 
     @Test
+    void adminLoginReturnsTokenOnly() {
+        var loginReq = Map.of("email", "admin@auto-ease.local", "password", "password");
+        var loginResp = rest.postForEntity("/api/auth/login", loginReq, Map.class);
+        assertEquals(HttpStatus.OK, loginResp.getStatusCode());
+        Map<String, Object> body = loginResp.getBody();
+        assertNotNull(body);
+        assertNotNull(body.get("token"));
+        assertNull(body.get("userId"));
+        assertNull(body.get("email"));
+        assertNull(body.get("userType"));
+        assertNull(body.get("fullName"));
+    }
+
+    @Test
+    void registerWithSeededAdminEmailReturns403() {
+        var req = Map.of(
+                "email", "admin@auto-ease.local",
+                "password", "pass123",
+                "fullName", "Impersonator",
+                "userType", "CAR_OWNER"
+        );
+        var resp = rest.postForEntity("/api/auth/register", req, String.class);
+        assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+    }
+
+    @Test
+    void registerAdminForbidden() {
+        var req = Map.of(
+                "email", uniqueEmail(),
+                "password", "pass123",
+                "fullName", "Not Admin",
+                "userType", "ADMIN"
+        );
+        var resp = rest.postForEntity("/api/auth/register", req, String.class);
+        assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+    }
+
+    @Test
     void registerDuplicateEmailReturns409() {
         String email = uniqueEmail();
         var req = Map.of("email", email, "password", "pass123", "fullName", "Dup", "userType", "GARAGE");

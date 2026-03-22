@@ -1,8 +1,9 @@
 package com.api.auto_ease.config;
 
 import com.api.auto_ease.security.JwtAuthFilter;
+import com.api.auto_ease.security.JwtService;
+import com.api.auto_ease.security.SwaggerUiAdminBootstrapFilter;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,10 +24,12 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@AllArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
+    @Bean
+    public SwaggerUiAdminBootstrapFilter swaggerUiAdminBootstrapFilter(JwtService jwtService) {
+        return new SwaggerUiAdminBootstrapFilter(jwtService);
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -41,7 +44,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtAuthFilter jwtAuthFilter,
+                                           SwaggerUiAdminBootstrapFilter swaggerUiAdminBootstrapFilter) throws Exception {
         http
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(c -> c.disable())
@@ -51,6 +56,12 @@ public class SecurityConfig {
                                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/garages/*/approve").hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/car-makes/**",
@@ -63,7 +74,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/garages/*/reviews").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(swaggerUiAdminBootstrapFilter, JwtAuthFilter.class);
 
         return http.build();
     }

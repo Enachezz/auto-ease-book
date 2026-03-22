@@ -57,6 +57,21 @@ class GarageIntegrationTest {
         );
     }
 
+    @Test
+    void carOwnerCannotCallAdminApproveEndpoint() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        var created = rest.exchange("/api/garages", HttpMethod.POST,
+                new HttpEntity<>(garageBody(), bearerHeaders(garageToken)), Map.class);
+        assertEquals(HttpStatus.CREATED, created.getStatusCode());
+        assertNotNull(created.getBody());
+        String garageId = created.getBody().get("id").toString();
+
+        String ownerToken = registerAndGetToken(uniqueEmail(), "CAR_OWNER");
+        var resp = rest.exchange("/api/garages/" + garageId + "/approve", HttpMethod.PATCH,
+                new HttpEntity<>(bearerHeaders(ownerToken)), String.class);
+        assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+    }
+
     // Test 1: Create garage — happy path
     @Test
     void createGarageHappyPath() {

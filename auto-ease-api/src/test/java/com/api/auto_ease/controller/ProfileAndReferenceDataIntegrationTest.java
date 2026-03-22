@@ -62,6 +62,18 @@ class ProfileAndReferenceDataIntegrationTest {
         assertEquals("CAR_OWNER", body.get("userType"));
     }
 
+    @Test
+    void adminProfileNotExposedViaApi() {
+        var loginReq = Map.of("email", "admin@auto-ease.local", "password", "password");
+        var loginResp = rest.postForEntity("/api/auth/login", loginReq, Map.class);
+        assertEquals(HttpStatus.OK, loginResp.getStatusCode());
+        String token = (String) loginResp.getBody().get("token");
+
+        var resp = rest.exchange("/api/profiles/me", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(token)), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
+    }
+
     // --- Test 2: Update own profile ---
     @Test
     void updateOwnProfile() {

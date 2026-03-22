@@ -1,6 +1,7 @@
 package com.api.auto_ease.service.profile;
 
 import com.api.auto_ease.domain.appUser.AppUser;
+import com.api.auto_ease.domain.appUser.AppUserType;
 import com.api.auto_ease.domain.profile.Profile;
 import com.api.auto_ease.dto.profile.ProfileResponse;
 import com.api.auto_ease.dto.profile.UpdateProfileRequest;
@@ -20,17 +21,26 @@ public class ProfileService {
     private final AppUserRepository appUserRepository;
 
     public ProfileResponse getProfile(String userId) {
-        Profile profile = profileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
-
         AppUser user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getType() == AppUserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
         return toResponse(profile, user);
     }
 
     @Transactional
     public ProfileResponse updateProfile(String userId, UpdateProfileRequest request) {
+        AppUser user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        if (user.getType() == AppUserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found");
+        }
+
         Profile profile = profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
@@ -45,9 +55,6 @@ public class ProfileService {
         }
 
         profileRepository.save(profile);
-
-        AppUser user = appUserRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         return toResponse(profile, user);
     }

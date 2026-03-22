@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER;
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE;
+
 @RestController
 @RequiredArgsConstructor
 public class QuoteController {
@@ -21,7 +24,7 @@ public class QuoteController {
     private final QuoteService quoteService;
 
     @PostMapping("/api/job-requests/{jobRequestId}/quotes")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public ResponseEntity<QuoteResponse> submitQuote(Authentication auth,
                                                       @PathVariable UUID jobRequestId,
                                                       @Valid @RequestBody CreateQuoteRequest request) {
@@ -30,7 +33,7 @@ public class QuoteController {
     }
 
     @GetMapping("/api/job-requests/{jobRequestId}/quotes")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public List<QuoteResponse> getQuotesForRequest(Authentication auth,
                                                    @PathVariable UUID jobRequestId) {
         String userId = (String) auth.getPrincipal();
@@ -38,7 +41,7 @@ public class QuoteController {
     }
 
     @GetMapping("/api/quotes/mine")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public List<QuoteResponse> getMyQuotes(Authentication auth) {
         String userId = (String) auth.getPrincipal();
         return quoteService.getMyQuotes(userId);

@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER;
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE;
+
 @RestController
 @RequiredArgsConstructor
 public class JobRequestController {
@@ -22,7 +25,7 @@ public class JobRequestController {
     private final JobRequestService jobRequestService;
 
     @PostMapping("/api/job-requests")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<JobRequestResponse> createJobRequest(Authentication auth,
                                                                 @Valid @RequestBody CreateJobRequestRequest request) {
         String userId = (String) auth.getPrincipal();
@@ -30,7 +33,7 @@ public class JobRequestController {
     }
 
     @GetMapping("/api/job-requests")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public List<JobRequestResponse> getMyJobRequests(Authentication auth,
                                                       @RequestParam(required = false) UUID categoryId) {
         String userId = (String) auth.getPrincipal();
@@ -38,7 +41,7 @@ public class JobRequestController {
     }
 
     @GetMapping("/api/job-requests/{id}")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public JobRequestResponse getJobRequest(Authentication auth,
                                              @PathVariable UUID id) {
         String userId = (String) auth.getPrincipal();
@@ -46,13 +49,13 @@ public class JobRequestController {
     }
 
     @GetMapping("/api/job-requests/open")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public List<JobRequestResponse> getOpenJobRequests(@RequestParam(required = false) UUID categoryId) {
         return jobRequestService.getOpenJobRequests(categoryId);
     }
 
     @PutMapping("/api/job-requests/{id}")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public JobRequestResponse updateJobRequest(Authentication auth,
                                                 @PathVariable UUID id,
                                                 @RequestBody UpdateJobRequestRequest request) {
@@ -61,7 +64,7 @@ public class JobRequestController {
     }
 
     @DeleteMapping("/api/job-requests/{id}")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<Void> deleteJobRequest(Authentication auth,
                                                   @PathVariable UUID id) {
         String userId = (String) auth.getPrincipal();

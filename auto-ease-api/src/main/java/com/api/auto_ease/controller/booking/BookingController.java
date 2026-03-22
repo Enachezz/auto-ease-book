@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER;
+
 @RestController
 @RequiredArgsConstructor
 public class BookingController {
@@ -20,7 +22,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping("/api/quotes/{quoteId}/accept")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<BookingResponse> acceptQuote(Authentication auth,
                                                        @PathVariable UUID quoteId,
                                                        @RequestBody(required = false) AcceptQuoteRequest request) {

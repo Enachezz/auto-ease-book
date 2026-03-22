@@ -6,7 +6,7 @@ import {
   createJobRequestViaApi,
   createGarageViaApi,
   approveGarageViaApi,
-  registerAdminViaApi,
+  loginSeededAdminViaApi,
   submitQuoteViaApi,
 } from './helpers';
 
@@ -137,7 +137,7 @@ test.describe('Garage Management', () => {
     await step('Setting up: A garage submits a quote for that job via API');
     const garage = await registerViaApi('GARAGE', 'QuoteTabGarage');
     const garageProfile = await createGarageViaApi(garage.token);
-    const admin = await registerAdminViaApi();
+    const admin = await loginSeededAdminViaApi();
     await approveGarageViaApi(garageProfile.id, admin.token);
     await submitQuoteViaApi(garage.token, job.id, 350, 'Premium oil change package');
 

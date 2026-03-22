@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER;
+
 @RestController
 @RequiredArgsConstructor
 public class CarController {
@@ -21,7 +23,7 @@ public class CarController {
     private final CarService carService;
 
     @PostMapping("/api/cars")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<CarResponse> addCar(Authentication auth,
                                               @Valid @RequestBody CreateCarRequest request) {
         String userId = (String) auth.getPrincipal();
@@ -29,14 +31,14 @@ public class CarController {
     }
 
     @GetMapping("/api/cars")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public List<CarResponse> getMyCars(Authentication auth) {
         String userId = (String) auth.getPrincipal();
         return carService.getMyCars(userId);
     }
 
     @PutMapping("/api/cars/{id}")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public CarResponse updateCar(Authentication auth,
                                  @PathVariable Integer id,
                                  @RequestBody UpdateCarRequest request) {
@@ -45,7 +47,7 @@ public class CarController {
     }
 
     @DeleteMapping("/api/cars/{id}")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<Void> deleteCar(Authentication auth,
                                           @PathVariable Integer id) {
         String userId = (String) auth.getPrincipal();

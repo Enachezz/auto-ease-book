@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_ADMIN;
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE;
+
 @RestController
 @RequiredArgsConstructor
 public class GarageController {
@@ -22,7 +25,7 @@ public class GarageController {
     private final GarageService garageService;
 
     @PostMapping("/api/garages")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public ResponseEntity<GarageResponse> createGarage(Authentication auth,
                                                        @Valid @RequestBody CreateGarageRequest request) {
         String userId = (String) auth.getPrincipal();
@@ -30,14 +33,14 @@ public class GarageController {
     }
 
     @GetMapping("/api/garages/me")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public GarageResponse getMyGarage(Authentication auth) {
         String userId = (String) auth.getPrincipal();
         return garageService.getMyGarage(userId);
     }
 
     @PutMapping("/api/garages/me")
-    @PreAuthorize("hasRole('GARAGE')")
+    @PreAuthorize(HAS_ROLE_GARAGE)
     public GarageResponse updateMyGarage(Authentication auth,
                                          @RequestBody UpdateGarageRequest request) {
         String userId = (String) auth.getPrincipal();
@@ -50,7 +53,7 @@ public class GarageController {
     }
 
     @PatchMapping("/api/garages/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize(HAS_ROLE_ADMIN)
     public GarageResponse approveGarage(@PathVariable UUID id) {
         return garageService.approveGarage(id);
     }

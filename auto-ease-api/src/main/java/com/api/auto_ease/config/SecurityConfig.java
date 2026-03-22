@@ -1,5 +1,6 @@
 package com.api.auto_ease.config;
 
+import com.api.auto_ease.domain.appUser.AppUserType;
 import com.api.auto_ease.security.JwtAuthFilter;
 import com.api.auto_ease.security.JwtService;
 import com.api.auto_ease.security.SwaggerUiAdminBootstrapFilter;
@@ -60,8 +61,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
-                        ).hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH, "/api/garages/*/approve").hasRole("ADMIN")
+                        ).hasRole(AppUserType.ADMIN.name())
+                        .requestMatchers(HttpMethod.PATCH, "/api/garages/*/approve").hasRole(AppUserType.ADMIN.name())
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/car-makes/**",

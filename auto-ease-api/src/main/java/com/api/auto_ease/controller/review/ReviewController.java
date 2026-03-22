@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER;
+
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
@@ -21,7 +23,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping("/api/bookings/{bookingId}/reviews")
-    @PreAuthorize("hasRole('CAR_OWNER')")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<ReviewResponse> createReview(Authentication auth,
                                                         @PathVariable UUID bookingId,
                                                         @Valid @RequestBody CreateReviewRequest request) {

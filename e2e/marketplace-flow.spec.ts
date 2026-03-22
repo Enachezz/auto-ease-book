@@ -6,7 +6,7 @@ import {
   createJobRequestViaApi,
   createGarageViaApi,
   approveGarageViaApi,
-  registerAdminViaApi,
+  loginSeededAdminViaApi,
   getBookingsViaApi,
 } from './helpers';
 
@@ -29,7 +29,7 @@ test.describe('Full Marketplace Flow', () => {
     const garageProfile = await createGarageViaApi(garage.token);
 
     await step('Setting up: An admin approves the garage so it can submit quotes');
-    const admin = await registerAdminViaApi();
+    const admin = await loginSeededAdminViaApi();
     await approveGarageViaApi(garageProfile.id, admin.token);
 
     // --- Garage submits quote via UI ---

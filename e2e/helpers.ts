@@ -133,8 +133,11 @@ export async function approveGarageViaApi(garageId: string, adminToken: string):
   await apiPatch(`/garages/${garageId}/approve`, adminToken);
 }
 
-export async function registerAdminViaApi(): Promise<AuthResult> {
-  return registerViaApi('ADMIN', 'E2E Admin');
+/** Flyway V8__seed_admin_user.sql; override with E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD if needed. */
+export async function loginSeededAdminViaApi(): Promise<{ token: string }> {
+  const email = process.env.E2E_ADMIN_EMAIL ?? 'admin@auto-ease.local';
+  const password = process.env.E2E_ADMIN_PASSWORD ?? 'password';
+  return apiPost<{ token: string }>('/auth/login', { email, password });
 }
 
 export interface QuoteResult {

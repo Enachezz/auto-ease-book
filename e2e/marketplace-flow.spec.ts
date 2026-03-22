@@ -78,7 +78,10 @@ test.describe('Full Marketplace Flow', () => {
     await page.getByRole('button', { name: /View Quotes/ }).first().click();
 
     await step('Checking: The quote shows $250 from the marketplace garage');
-    await expect(page.getByText('250')).toBeVisible({ timeout: 10_000 });
+    // Scope to the quotes dialog — headed e2e overlay text also contains "250" / "$250".
+    await expect(
+      page.getByRole('dialog').getByText('$250', { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
 
     await step('Car owner clicks "Accept Quote" to book the service');
     await page.getByRole('button', { name: 'Accept Quote' }).click();

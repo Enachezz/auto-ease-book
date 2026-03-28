@@ -13,6 +13,7 @@ import EditRequest from "./pages/EditRequest";
 import MyCars from "./pages/MyCars";
 import GarageManagement from "./pages/GarageManagement";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

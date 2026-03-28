@@ -1,5 +1,20 @@
 const API_URL = 'http://localhost:8080/api';
 
+const STATUS_MESSAGES: Record<number, string> = {
+  400: 'Cererea nu a putut fi procesată. Verifică datele introduse.',
+  401: 'Credențiale invalide sau sesiune expirată.',
+  403: 'Nu ai permisiunea de a efectua această acțiune.',
+  404: 'Resursa solicitată nu a fost găsită.',
+  409: 'Există deja o înregistrare cu aceste date.',
+  422: 'Datele introduse nu sunt valide.',
+  429: 'Prea multe cereri. Încearcă din nou mai târziu.',
+  500: 'Eroare internă a serverului. Încearcă din nou mai târziu.',
+};
+
+function getUserFriendlyMessage(status: number, _rawText: string): string {
+  return STATUS_MESSAGES[status] || `A apărut o eroare neașteptată (cod ${status}).`;
+}
+
 async function request<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem('token');
   const headers: Record<string, string> = {

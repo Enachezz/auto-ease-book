@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Car, LogOut, User, Wrench, List, Menu, Settings } from 'lucide-react';
+import { Car, LogOut, User, Wrench, List, Menu, Settings, Shield } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
@@ -81,6 +81,16 @@ export function Layout({ children }: LayoutProps) {
                 >
                   <Wrench className="h-4 w-4 mr-2" />
                   Gestionare Service
+                </Button>
+              )}
+              {profile.user_type === 'admin' && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/admin')}
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Panou Admin
                 </Button>
               )}
             </nav>
@@ -187,6 +197,16 @@ export function Layout({ children }: LayoutProps) {
                       >
                         <Wrench className="h-4 w-4 mr-2" />
                         Gestionare Service
+                      </Button>
+                    )}
+                    {profile.user_type === 'admin' && (
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start"
+                        onClick={() => handleNavigation('/admin')}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Panou Admin
                       </Button>
                     )}
 

@@ -13,6 +13,7 @@ import EditRequest from "./pages/EditRequest";
 import MyCars from "./pages/MyCars";
 import GarageManagement from "./pages/GarageManagement";
 import Settings from "./pages/Settings";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/edit-request/:jobId" element={<EditRequest />} />
             <Route path="/my-cars" element={<MyCars />} />
             <Route path="/garage" element={<GarageManagement />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

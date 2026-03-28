@@ -13,8 +13,12 @@ async function request<T = unknown>(path: string, options: RequestInit = {}): Pr
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
 
   if (!response.ok) {
+    // Log raw error for debugging but show user-friendly messages
     const text = await response.text();
-    throw new Error(text || `Request failed with status ${response.status}`);
+    console.error(`API error [${response.status}]: ${text}`);
+    
+    const userMessage = getUserFriendlyMessage(response.status, text);
+    throw new Error(userMessage);
   }
 
   if (response.status === 204) return undefined as T;

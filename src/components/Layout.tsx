@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Car, LogOut, User, Wrench, List, Menu, Settings } from 'lucide-react';
+import { Car, LogOut, User, Wrench, List, Menu, Settings, Shield } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,

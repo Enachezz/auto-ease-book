@@ -199,6 +199,16 @@ export function Layout({ children }: LayoutProps) {
                         Gestionare Service
                       </Button>
                     )}
+                    {profile.user_type === 'admin' && (
+                      <Button 
+                        variant="ghost" 
+                        className="justify-start"
+                        onClick={() => handleNavigation('/admin')}
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Panou Admin
+                      </Button>
+                    )}
 
                     {/* Sign Out */}
                     <Button 

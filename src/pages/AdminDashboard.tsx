@@ -135,7 +135,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <h1 className="text-3xl font-bold">Panou Admin</h1>
-            <p className="text-muted-foreground">Gestionează platforma AutoFix</p>
+            <p className="text-muted-foreground">Gestionează platforma Fast Fix Auto</p>
           </div>
         </div>
 

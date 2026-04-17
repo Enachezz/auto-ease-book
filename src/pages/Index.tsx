@@ -9,7 +9,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import heroBackground from '@/assets/hero-background.jpg';
-import autofixLogo from '@/assets/autofix-logo.png';
+import autofixLogo from '@/assets/fast-fix-auto-logo.png';
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -137,7 +137,7 @@ const Index = () => {
       {/* How it works */}
       <div className="mb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Cum Funcționează AutoFix</h2>
+          <h2 className="text-3xl font-bold mb-4">Cum Funcționează Fast Fix Auto</h2>
           <p className="text-lg text-muted-foreground">Pași simpli pentru a-ți repara mașina</p>
         </div>
         
@@ -209,7 +209,7 @@ const Index = () => {
       <div className="bg-primary text-primary-foreground rounded-2xl p-8 text-center mb-16">
         <h2 className="text-3xl font-bold mb-4">Gata să începi?</h2>
         <p className="text-lg mb-6 opacity-90">
-          Alătură-te miilor de șoferi care au încredere în AutoFix pentru reparațiile auto
+          Alătură-te miilor de șoferi care au încredere în Fast Fix Auto pentru reparațiile auto
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {!user ? (
@@ -351,9 +351,9 @@ const Index = () => {
         {/* Bottom Footer */}
         <div className="pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <img src={autofixLogo} alt="AutoFix" className="h-8 brightness-0 dark:brightness-100" />
+            <img src={autofixLogo} alt="Fast Fix Auto" className="h-8 brightness-0 dark:brightness-100" />
             <div className="text-sm text-muted-foreground">
-              <p className="font-medium">AutoFix</p>
+              <p className="font-medium">Fast Fix Auto</p>
               <p>Economisește mai mult. Stres mai puțin.</p>
               <p>Viitorul reparațiilor auto începe astăzi.</p>
             </div>

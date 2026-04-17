@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
-import autofixLogo from '@/assets/autofix-logo.png';
+import autofixLogo from '@/assets/fast-fix-auto-logo.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,7 +40,7 @@ export function Layout({ children }: LayoutProps) {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <img src={autofixLogo} alt="AutoFix" className="h-10 md:h-12 brightness-0 dark:brightness-100" />
+            <img src={autofixLogo} alt="Fast Fix Auto" className="h-10 md:h-12 brightness-0 dark:brightness-100" />
           </div>
 
           {/* Desktop Navigation */}

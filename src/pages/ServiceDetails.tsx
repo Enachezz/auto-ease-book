@@ -196,7 +196,7 @@ const ServiceDetails = () => {
                     <Alert>
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
-                        Pentru a trimite o cerere de service, trebuie să ai un cont AutoFix.
+                        Pentru a trimite o cerere de service, trebuie să ai un cont Fast Fix Auto.
                       </AlertDescription>
                     </Alert>
                     <Button

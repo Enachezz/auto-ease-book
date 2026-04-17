@@ -426,7 +426,7 @@ const MyCars = () => {
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Generat: ${new Date().toLocaleDateString('ro-RO')} | AutoFix Report`, 105, 32, { align: 'center' });
+      doc.text(`Generat: ${new Date().toLocaleDateString('ro-RO')} | Fast Fix Auto Report`, 105, 32, { align: 'center' });
       
       doc.setTextColor(0, 0, 0);
 
@@ -1412,7 +1412,7 @@ const MyCars = () => {
                             <Wrench className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                             <h3 className="text-lg font-semibold mb-2">Niciun istoric de service încă</h3>
                             <p className="text-muted-foreground">
-                              Serviciile completate prin AutoFix și intrările manuale vor apărea aici
+                              Serviciile completate prin Fast Fix Auto și intrările manuale vor apărea aici
                             </p>
                           </CardContent>
                         </Card>

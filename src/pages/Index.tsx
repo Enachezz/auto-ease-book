@@ -351,7 +351,7 @@ const Index = () => {
         {/* Bottom Footer */}
         <div className="pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <img src={autofixLogo} alt="Fast Fix Auto" className="h-8 brightness-0 dark:brightness-100" />
+            <img src={autofixLogo} alt="Fast Fix Auto" className="h-8" />
             <div className="text-sm text-muted-foreground">
               <p className="font-medium">Fast Fix Auto</p>
               <p>Economisește mai mult. Stres mai puțin.</p>

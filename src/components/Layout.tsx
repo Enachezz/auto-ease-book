@@ -40,7 +40,7 @@ export function Layout({ children }: LayoutProps) {
             className="flex items-center gap-2 cursor-pointer" 
             onClick={() => navigate('/')}
           >
-            <img src={autofixLogo} alt="Fast Fix Auto" className="h-10 md:h-12 brightness-0 dark:brightness-100" />
+            <img src={autofixLogo} alt="Fast Fix Auto" className="h-10 md:h-12" />
           </div>
 
           {/* Desktop Navigation */}

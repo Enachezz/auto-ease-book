@@ -49,7 +49,7 @@ export default function Auth() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link to="/">
-            <img src={autofixLogo} alt="Fast Fix Auto" className="h-16 mx-auto mb-4 brightness-0 dark:brightness-100 cursor-pointer hover:opacity-80 transition-opacity" />
+            <img src={autofixLogo} alt="Fast Fix Auto" className="h-16 mx-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity" />
           </Link>
           <p className="text-muted-foreground">Conectează proprietarii de mașini cu service-uri de încredere</p>
         </div>

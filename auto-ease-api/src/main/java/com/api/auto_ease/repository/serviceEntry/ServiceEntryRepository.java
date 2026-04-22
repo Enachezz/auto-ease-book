@@ -20,5 +20,7 @@ public interface ServiceEntryRepository extends JpaRepository<ServiceEntry, Long
 
     List<ServiceEntry> findByClientUuid(String clientUuid);
 
+    List<ServiceEntry> findAllByCarVin(String vinNumber);
+
     Optional<ServiceEntry> findByClientUuidAndServiceUuid(String clientUuid, String serviceUuid);
 }

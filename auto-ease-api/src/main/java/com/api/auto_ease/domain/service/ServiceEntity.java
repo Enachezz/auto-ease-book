@@ -21,7 +21,7 @@ import static java.time.LocalDateTime.now;
 @Setter
 @Entity
 @Table(name = "SERVICE")
-public class Service {
+public class ServiceEntity {
 
     @Id
     @Column(name = "uuid", unique = true, nullable = false, length = 50)
@@ -47,6 +47,9 @@ public class Service {
 
     @Column(name = "address")
     private String address;
+
+    @Column(name = "dealership")
+    private boolean dealership;
 
     @PreUpdate
     void onUpdate() {

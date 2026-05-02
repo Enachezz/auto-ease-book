@@ -4,7 +4,10 @@ const headed = process.env.PW_HEADED === '1' || process.env.PW_HEADED === 'true'
 
 export default defineConfig({
   testDir: './e2e',
-  timeout: 60_000,
+  /** Headed runs use 2s pauses between each `step()` in fixtures — needs a higher ceiling. */
+  timeout: headed ? 600_000 : 60_000,
+  /** One browser at a time when headed so only a single test window is visible. */
+  workers: headed ? 1 : undefined,
   expect: {
     timeout: 10_000,
   },

@@ -1,0 +1,2 @@
+ALTER TABLE SERVICE
+ADD COLUMN dealership boolean;

@@ -13,7 +13,7 @@ import {
 test.describe('Full Marketplace Flow', () => {
 
   test('owner creates request, garage quotes, owner accepts, booking and review', async ({ page, step }) => {
-    test.setTimeout(300_000);
+    test.setTimeout(600_000);
 
     await step('Setting up: Registering a new car owner via API');
     const owner = await registerViaApi('CAR_OWNER', 'Marketplace Owner');
@@ -60,8 +60,10 @@ test.describe('Full Marketplace Flow', () => {
     await step('Garage owner submits the quote');
     await page.locator('button:not([disabled])').filter({ hasText: 'Submit Quote' }).first().click();
 
+    await expect(page.getByRole('status').filter({ hasText: 'Success' }).first()).toBeVisible({
+      timeout: 10_000,
+    });
     await step('Checking: A success notification confirms the quote was sent', DELAY.STEP_LONG);
-    await expect(page.getByRole('status').filter({ hasText: 'Success' }).first()).toBeVisible({ timeout: 10_000 });
 
     // --- Owner accepts quote via UI ---
     await step('Switching user: Now acting as the car owner', DELAY.STEP_LONG);
@@ -86,8 +88,12 @@ test.describe('Full Marketplace Flow', () => {
     await step('Car owner clicks "Accept Quote" to book the service');
     await page.getByRole('button', { name: 'Accept Quote' }).click();
 
-    await step('Checking: A success notification confirms the quote was accepted', DELAY.STEP_LONG);
-    await expect(page.getByRole('status').filter({ hasText: 'Success' }).first()).toBeVisible({ timeout: 10_000 });
+    // Radix toasts auto-dismiss (~5s). A headed step delay before this assert often misses them entirely.
+    await expect(
+      page.getByRole('dialog').getByText('ACCEPTED', { exact: true })
+    ).toBeVisible({ timeout: 10_000 });
+
+    await step('Checking: The accepted quote shows ACCEPTED in the offers dialog', DELAY.STEP_LONG);
 
     await step('Car owner returns to My Requests to verify the new status', DELAY.STEP_LONG);
     await page.goto('/my-requests');

@@ -5,8 +5,8 @@ export const DELAY = {
   INTERACTION: 500,
   ACTION: 1000,
   NAVIGATION: 2000,
-  STEP: 1500,
-  STEP_LONG: 2500,
+  STEP: 2_000,
+  STEP_LONG: 2_000,
 } as const;
 
 const isHeadedWithDelay =

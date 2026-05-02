@@ -19,7 +19,7 @@ public class ClientServiceEntryStrategy implements ServiceEntryStrategy<ClientSe
 
         if (payload != null) {
             serviceEntry.setClientUuid(payload.getClientUuid());
-            serviceEntry.setServiceUuid(payload.getServiceUuid());
+            serviceEntry.setGarageId(payload.getGarageId());
             serviceEntry.setEntryType(payload.getEntryType());
             serviceEntry.setCarMake(payload.getCarMake());
             serviceEntry.setCarModel(payload.getCarModel());

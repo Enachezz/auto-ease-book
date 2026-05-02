@@ -4,6 +4,7 @@ import com.api.auto_ease.domain.appUser.AppUser;
 import com.api.auto_ease.domain.appUser.AppUserType;
 import com.api.auto_ease.domain.serviceEntry.ServiceEntry;
 import com.api.auto_ease.repository.appUser.AppUserRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import com.api.auto_ease.service.serviceEntry.dto.ClientServiceEntryRequest;
 import com.api.auto_ease.service.serviceEntry.dto.ServiceLookupRequest;
 import com.api.auto_ease.service.serviceEntry.strategy.ClientServiceEntryStrategy;
@@ -22,6 +23,7 @@ public class ServiceEntryService {
     private final AppUserRepository appUserRepository;
     private final ClientServiceEntryStrategy clientStrategy;
     private final ServiceServiceEntryStrategy serviceStrategy;
+    private final GarageService garageService;
     
     private Map<AppUserType, ServiceEntryStrategy> strategyMap;
 
@@ -51,7 +53,11 @@ public class ServiceEntryService {
         if (user.getType() == AppUserType.CAR_OWNER) {
             return clientStrategy.processServiceEntry((ClientServiceEntryRequest) payload);
         } else if (user.getType() == AppUserType.GARAGE) {
-            return serviceStrategy.processServiceEntry((ServiceLookupRequest) payload);
+            ServiceLookupRequest lookup = (ServiceLookupRequest) payload;
+            if (lookup != null && lookup.getGarageId() != null) {
+                garageService.assertGarageUserOwnsGarage(userUuid, lookup.getGarageId());
+            }
+            return serviceStrategy.processServiceEntry(lookup);
         }
 
         throw new IllegalArgumentException("Unsupported user type: " + user.getType());

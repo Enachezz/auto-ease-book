@@ -2,6 +2,7 @@ package com.api.auto_ease.repository.garage;
 
 import com.api.auto_ease.domain.garage.Garage;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface GarageRepository extends JpaRepository<Garage, UUID> {
+public interface GarageRepository extends JpaRepository<Garage, UUID>, JpaSpecificationExecutor<Garage> {
 
     Optional<Garage> findByUserId(String userId);
 

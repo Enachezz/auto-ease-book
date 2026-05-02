@@ -15,6 +15,8 @@ public class UpdateGarageRequest {
     private String state;
     private String postalCode;
     private String phone;
+    private String email;
+    private Boolean dealership;
     private String description;
     private String[] services;
 }

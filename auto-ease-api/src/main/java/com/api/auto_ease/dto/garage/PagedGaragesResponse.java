@@ -1,4 +1,4 @@
-package com.api.auto_ease.dto.service;
+package com.api.auto_ease.dto.garage;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,9 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PagedServicesResponse {
+public class PagedGaragesResponse {
 
-    private List<ServiceSummaryResponse> services;
+    private List<GarageResponse> garages;
     private long totalCount;
     private int page;
     private int pageSize;

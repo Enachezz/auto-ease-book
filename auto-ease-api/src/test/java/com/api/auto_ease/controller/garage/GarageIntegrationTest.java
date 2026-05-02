@@ -44,6 +44,41 @@ class GarageIntegrationTest {
         return headers;
     }
 
+    private String adminToken() {
+        var loginReq = Map.of("email", "admin@auto-ease.local", "password", "password");
+        var loginResp = rest.postForEntity("/api/auth/login", loginReq, Map.class);
+        assertEquals(HttpStatus.OK, loginResp.getStatusCode());
+        assertNotNull(loginResp.getBody());
+        return (String) loginResp.getBody().get("token");
+    }
+
+    private String createGarageAndGetId(String garageToken, String businessName) {
+        var body = Map.of(
+                "businessName", businessName,
+                "address", "Str. Republicii 10",
+                "city", "Cluj-Napoca",
+                "state", "Cluj",
+                "postalCode", "400001",
+                "phone", "+40741000000",
+                "description", "Full service auto repair",
+                "services", List.of("Oil Change", "Brake Service")
+        );
+        var resp = rest.exchange("/api/garages", HttpMethod.POST,
+                new HttpEntity<>(body, bearerHeaders(garageToken)), Map.class);
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
+        assertNotNull(resp.getBody());
+        return resp.getBody().get("id").toString();
+    }
+
+    private List<Map<String, Object>> listServiceCategories() {
+        var resp = rest.exchange("/api/service-categories", HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody());
+        assertFalse(resp.getBody().isEmpty());
+        return resp.getBody();
+    }
+
     private Map<String, Object> garageBody() {
         return Map.of(
                 "businessName", "AutoService Pro",
@@ -210,5 +245,86 @@ class GarageIntegrationTest {
         assertEquals(HttpStatus.OK, getResp.getStatusCode());
         assertEquals("My Garage", getResp.getBody().get("businessName"));
         assertEquals(false, getResp.getBody().get("isApproved"));
+    }
+
+    @Test
+    void updateMyCategoriesHappyPath() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        createGarageAndGetId(garageToken, "Categories Happy Path Garage");
+
+        List<Map<String, Object>> categories = listServiceCategories();
+        String categoryId = categories.get(0).get("id").toString();
+
+        var setReq = Map.of("categoryIds", List.of(categoryId));
+        var setResp = rest.exchange("/api/garages/me/categories", HttpMethod.PUT,
+                new HttpEntity<>(setReq, bearerHeaders(garageToken)), Void.class);
+        assertEquals(HttpStatus.NO_CONTENT, setResp.getStatusCode());
+
+        var getResp = rest.exchange("/api/garages/me/categories", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(garageToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, getResp.getStatusCode());
+        assertNotNull(getResp.getBody());
+        assertEquals(1, getResp.getBody().size());
+        assertEquals(categoryId, getResp.getBody().get(0).get("id").toString());
+    }
+
+    @Test
+    void updateMyCategoriesGarageWithoutProfileRejected() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        List<Map<String, Object>> categories = listServiceCategories();
+        String categoryId = categories.get(0).get("id").toString();
+
+        var setReq = Map.of("categoryIds", List.of(categoryId));
+        var setResp = rest.exchange("/api/garages/me/categories", HttpMethod.PUT,
+                new HttpEntity<>(setReq, bearerHeaders(garageToken)), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, setResp.getStatusCode());
+    }
+
+    @Test
+    void searchGaragesFiltersByAssignedServiceCategory() {
+        String garageTokenA = registerAndGetToken(uniqueEmail(), "GARAGE");
+        String garageTokenB = registerAndGetToken(uniqueEmail(), "GARAGE");
+        String garageIdA = createGarageAndGetId(garageTokenA, "Filter Category Garage A");
+        String garageIdB = createGarageAndGetId(garageTokenB, "Filter Category Garage B");
+
+        String adminToken = adminToken();
+        var approveA = rest.exchange("/api/garages/" + garageIdA + "/approve", HttpMethod.PATCH,
+                new HttpEntity<>(bearerHeaders(adminToken)), Map.class);
+        var approveB = rest.exchange("/api/garages/" + garageIdB + "/approve", HttpMethod.PATCH,
+                new HttpEntity<>(bearerHeaders(adminToken)), Map.class);
+        assertEquals(HttpStatus.OK, approveA.getStatusCode());
+        assertEquals(HttpStatus.OK, approveB.getStatusCode());
+
+        List<Map<String, Object>> categories = listServiceCategories();
+        String categoryA = categories.get(0).get("id").toString();
+        String categoryB = categories.get(1).get("id").toString();
+
+        var setA = Map.of("categoryIds", List.of(categoryA));
+        var setB = Map.of("categoryIds", List.of(categoryB));
+        var setRespA = rest.exchange("/api/garages/me/categories", HttpMethod.PUT,
+                new HttpEntity<>(setA, bearerHeaders(garageTokenA)), Void.class);
+        var setRespB = rest.exchange("/api/garages/me/categories", HttpMethod.PUT,
+                new HttpEntity<>(setB, bearerHeaders(garageTokenB)), Void.class);
+        assertEquals(HttpStatus.NO_CONTENT, setRespA.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, setRespB.getStatusCode());
+
+        var searchReq = Map.of(
+                "filter", Map.of("categoryIds", List.of(categoryA)),
+                "page", 0
+        );
+        var searchResp = rest.exchange("/api/garages/search", HttpMethod.POST,
+                new HttpEntity<>(searchReq), Map.class);
+        assertEquals(HttpStatus.OK, searchResp.getStatusCode());
+        assertNotNull(searchResp.getBody());
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> garages = (List<Map<String, Object>>) searchResp.getBody().get("garages");
+        assertNotNull(garages);
+
+        boolean containsA = garages.stream().anyMatch(g -> garageIdA.equals(String.valueOf(g.get("id"))));
+        boolean containsB = garages.stream().anyMatch(g -> garageIdB.equals(String.valueOf(g.get("id"))));
+        assertTrue(containsA, "Expected filtered results to include garage A");
+        assertFalse(containsB, "Expected filtered results to exclude garage B");
     }
 }

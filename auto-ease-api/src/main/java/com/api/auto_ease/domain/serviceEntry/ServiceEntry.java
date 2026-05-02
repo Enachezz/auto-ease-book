@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +24,8 @@ public class ServiceEntry extends BaseEntity {
     @Column(name = "client_uuid")
     private String clientUuid;
 
-    @Column(name = "service_uuid")
-    private String serviceUuid;
+    @Column(name = "garage_id")
+    private UUID garageId;
 
     @Column(name = "entry_type")
     private String entryType;

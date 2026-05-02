@@ -10,6 +10,7 @@ import com.api.auto_ease.dto.quote.QuoteResponse;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class QuoteService {
     private final QuoteRepository quoteRepository;
     private final JobRequestRepository jobRequestRepository;
     private final GarageRepository garageRepository;
+    private final GarageService garageService;
 
     @Transactional
     public QuoteResponse submitQuote(String garageUserId, UUID jobRequestId, CreateQuoteRequest request) {
@@ -38,6 +40,8 @@ public class QuoteService {
         if (jobRequest.getStatus() != JobRequestStatus.OPEN) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job request is not open for quotes");
         }
+
+        garageService.assertGarageAcceptsJobCategoryOrUnrestricted(garage, jobRequest.getCategoryId());
 
         if (quoteRepository.existsByJobRequestIdAndGarageId(jobRequestId, garage.getId())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You already submitted a quote for this job request");

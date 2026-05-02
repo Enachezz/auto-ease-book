@@ -3,6 +3,8 @@ package com.api.auto_ease.service.jobrequest;
 import com.api.auto_ease.domain.car.Car;
 import com.api.auto_ease.domain.carMake.CarMake;
 import com.api.auto_ease.domain.carModel.CarModel;
+import com.api.auto_ease.domain.garage.Garage;
+import com.api.auto_ease.domain.garageCategory.GarageCategoryAssignment;
 import com.api.auto_ease.domain.jobrequest.JobRequest;
 import com.api.auto_ease.domain.jobrequest.JobRequestStatus;
 import com.api.auto_ease.domain.jobrequest.Urgency;
@@ -13,6 +15,8 @@ import com.api.auto_ease.dto.jobrequest.UpdateJobRequestRequest;
 import com.api.auto_ease.repository.car.CarRepository;
 import com.api.auto_ease.repository.carMake.CarMakeRepository;
 import com.api.auto_ease.repository.carModel.CarModelRepository;
+import com.api.auto_ease.repository.garage.GarageRepository;
+import com.api.auto_ease.repository.garageCategory.GarageCategoryAssignmentRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.repository.serviceCategory.ServiceCategoryRepository;
@@ -22,7 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -35,6 +41,8 @@ public class JobRequestService {
     private final QuoteRepository quoteRepository;
     private final CarMakeRepository carMakeRepository;
     private final CarModelRepository carModelRepository;
+    private final GarageRepository garageRepository;
+    private final GarageCategoryAssignmentRepository garageCategoryAssignmentRepository;
 
     @Transactional
     public JobRequestResponse createJobRequest(String userId, CreateJobRequestRequest request) {
@@ -92,7 +100,19 @@ public class JobRequestService {
                 .toList();
     }
 
-    public List<JobRequestResponse> getOpenJobRequests(UUID categoryId) {
+    /**
+     * Open job requests visible to this garage: optionally filtered by query {@code categoryId},
+     * then restricted to categories accepted on the garage when at least one is configured.
+     */
+    @Transactional(readOnly = true)
+    public List<JobRequestResponse> getOpenJobRequestsForGarageUser(String garageUserId, UUID categoryId) {
+        Garage garage = garageRepository.findByUserId(garageUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Garage profile required"));
+        Set<UUID> acceptedIds = new HashSet<>();
+        for (GarageCategoryAssignment assignment : garageCategoryAssignmentRepository.findByGarage_Id(garage.getId())) {
+            acceptedIds.add(assignment.getCategory().getId());
+        }
+
         List<JobRequest> jobRequests;
         if (categoryId != null) {
             jobRequests = jobRequestRepository.findByStatusAndCategoryIdOrderByCreatedDateDesc(JobRequestStatus.OPEN, categoryId);
@@ -101,8 +121,19 @@ public class JobRequestService {
         }
 
         return jobRequests.stream()
+                .filter(jr -> isJobVisibleToGarage(jr, acceptedIds))
                 .map(this::toResponse)
                 .toList();
+    }
+
+    private boolean isJobVisibleToGarage(JobRequest jobRequest, Set<UUID> acceptedCategoryIds) {
+        if (jobRequest.getCategoryId() == null) {
+            return true;
+        }
+        if (acceptedCategoryIds.isEmpty()) {
+            return true;
+        }
+        return acceptedCategoryIds.contains(jobRequest.getCategoryId());
     }
 
     @Transactional

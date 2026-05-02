@@ -28,8 +28,8 @@ public class ServiceServiceEntryStrategy implements ServiceEntryStrategy<Service
 
         if (payload != null && payload.getEntryId() != null) {
             Optional<ServiceEntry> entry = serviceEntryRepository.findById(payload.getEntryId());
-            if (entry.isPresent() && payload.getServiceUuid() != null 
-                && entry.get().getServiceUuid() == null) {
+            if (entry.isPresent() && payload.getGarageId() != null
+                && entry.get().getGarageId() == null) {
                 foundEntry = entry.get();
             }
         }
@@ -39,7 +39,7 @@ public class ServiceServiceEntryStrategy implements ServiceEntryStrategy<Service
             throw new MessageException("Something went wrong");
         }
 
-        foundEntry.setServiceUuid(payload.getServiceUuid());
+        foundEntry.setGarageId(payload.getGarageId());
 
         return foundEntry;
     }

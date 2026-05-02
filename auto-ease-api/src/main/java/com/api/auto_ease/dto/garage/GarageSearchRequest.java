@@ -1,4 +1,4 @@
-package com.api.auto_ease.dto.service;
+package com.api.auto_ease.dto.garage;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServiceSearchRequest {
+public class GarageSearchRequest {
 
     @Valid
-    private ServiceFilterCriteria filter;
+    private GarageFilterCriteria filter;
 
     @Min(0)
     @Builder.Default

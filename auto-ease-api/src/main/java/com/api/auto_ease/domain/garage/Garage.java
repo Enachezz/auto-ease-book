@@ -1,7 +1,12 @@
 package com.api.auto_ease.domain.garage;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +19,6 @@ import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
@@ -50,6 +54,12 @@ public class Garage {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "dealership", nullable = false)
+    private boolean dealership;
 
     @Column(name = "services", columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)

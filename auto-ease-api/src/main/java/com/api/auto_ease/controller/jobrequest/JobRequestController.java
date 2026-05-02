@@ -50,8 +50,10 @@ public class JobRequestController {
 
     @GetMapping("/api/job-requests/open")
     @PreAuthorize(HAS_ROLE_GARAGE)
-    public List<JobRequestResponse> getOpenJobRequests(@RequestParam(required = false) UUID categoryId) {
-        return jobRequestService.getOpenJobRequests(categoryId);
+    public List<JobRequestResponse> getOpenJobRequests(Authentication auth,
+                                                       @RequestParam(required = false) UUID categoryId) {
+        String userId = (String) auth.getPrincipal();
+        return jobRequestService.getOpenJobRequestsForGarageUser(userId, categoryId);
     }
 
     @PutMapping("/api/job-requests/{id}")

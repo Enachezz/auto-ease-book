@@ -190,6 +190,7 @@ class JobRequestAndQuoteIntegrationTest {
                 new HttpEntity<>(jobRequestBody(car.get("id")), bearerHeaders(ownerToken)), Map.class);
 
         String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        createGarageProfile(garageToken);
 
         var resp = rest.exchange("/api/job-requests/open", HttpMethod.GET,
                 new HttpEntity<>(bearerHeaders(garageToken)),

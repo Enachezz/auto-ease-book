@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ import java.time.LocalDate;
 public class ClientServiceEntryRequest {
 
     private String clientUuid;
-    private String serviceUuid;
+    private UUID garageId;
     private String entryType;
     private String carMake;
     private String carModel;
@@ -28,5 +29,3 @@ public class ClientServiceEntryRequest {
     private BigDecimal cost;
     private String note;
 }
-
-

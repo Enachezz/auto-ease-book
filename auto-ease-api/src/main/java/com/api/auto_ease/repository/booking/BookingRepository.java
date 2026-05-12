@@ -4,6 +4,7 @@ import com.api.auto_ease.domain.booking.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,4 +17,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     List<Booking> findByQuoteIdIn(List<UUID> quoteIds);
 
     boolean existsByQuoteId(UUID quoteId);
+
+    List<Booking> findByGarageId(UUID garageId);
+
+    List<Booking> findByGarageIdAndScheduledDateBetween(UUID garageId, LocalDate from, LocalDate to);
 }

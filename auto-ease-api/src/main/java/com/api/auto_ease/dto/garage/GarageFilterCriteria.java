@@ -24,4 +24,10 @@ public class GarageFilterCriteria {
      * (via {@link com.api.auto_ease.domain.garageCategory.GarageCategoryAssignment}). Null or empty applies no category filter.
      */
     private Set<UUID> categoryIds;
+
+    /**
+     * When non-null, only garages whose {@link com.api.auto_ease.domain.garage.Garage#isDealership()} matches.
+     * Null applies no dealership filter.
+     */
+    private Boolean isDealership;
 }

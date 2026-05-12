@@ -63,12 +63,14 @@ public class BookingService {
         jobRequest.setStatus(JobRequestStatus.BOOKED);
         jobRequestRepository.save(jobRequest);
 
-        Booking booking = new Booking(null, quoteId,
-                request != null ? request.getScheduledDate() : null,
-                request != null ? request.getScheduledTime() : null,
-                BookingStatus.CONFIRMED,
-                request != null ? request.getNotes() : null,
-                null, null);
+        Booking booking = new Booking();
+        booking.setQuoteId(quoteId);
+        booking.setGarageId(quote.getGarageId());
+        booking.setCustomerId(jobRequest.getUserId());
+        booking.setScheduledDate(request != null ? request.getScheduledDate() : null);
+        booking.setScheduledTime(request != null ? request.getScheduledTime() : null);
+        booking.setStatus(BookingStatus.CONFIRMED);
+        booking.setNotes(request != null ? request.getNotes() : null);
         booking = bookingRepository.save(booking);
 
         Garage garage = garageRepository.findById(quote.getGarageId()).orElse(null);

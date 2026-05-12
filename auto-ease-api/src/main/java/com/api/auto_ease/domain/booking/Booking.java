@@ -28,6 +28,12 @@ public class Booking {
     @Column(name = "quote_id", nullable = false, unique = true)
     private UUID quoteId;
 
+    @Column(name = "garage_id", nullable = false)
+    private UUID garageId;
+
+    @Column(name = "customer_id", nullable = false, length = 50)
+    private String customerId;
+
     @Column(name = "scheduled_date")
     private LocalDate scheduledDate;
 

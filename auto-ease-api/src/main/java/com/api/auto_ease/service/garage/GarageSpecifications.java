@@ -49,6 +49,9 @@ final class GarageSpecifications {
                     predicates.add(cb.exists(hasCategory));
                 }
             }
+            if (criteria.getIsDealership() != null) {
+                predicates.add(cb.equal(root.get("dealership"), criteria.getIsDealership()));
+            }
             if (predicates.isEmpty()) {
                 return cb.conjunction();
             }

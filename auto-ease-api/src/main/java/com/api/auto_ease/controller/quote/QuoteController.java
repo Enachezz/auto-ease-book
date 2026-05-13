@@ -46,4 +46,11 @@ public class QuoteController {
         String userId = (String) auth.getPrincipal();
         return quoteService.getMyQuotes(userId);
     }
+
+    @PostMapping("/api/quotes/{quoteId}/reject")
+    @PreAuthorize(HAS_ROLE_CAR_OWNER)
+    public QuoteResponse rejectQuote(Authentication auth, @PathVariable UUID quoteId) {
+        String userId = (String) auth.getPrincipal();
+        return quoteService.rejectQuote(userId, quoteId);
+    }
 }

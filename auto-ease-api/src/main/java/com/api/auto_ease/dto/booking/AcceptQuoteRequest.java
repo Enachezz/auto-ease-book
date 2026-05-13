@@ -12,6 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class AcceptQuoteRequest {
 
+    private Boolean addendumFlow;
     private LocalDate scheduledDate;
     private LocalTime scheduledTime;
     private String notes;

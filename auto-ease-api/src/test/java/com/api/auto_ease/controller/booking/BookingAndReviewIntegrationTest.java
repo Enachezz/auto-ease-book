@@ -136,7 +136,7 @@ class BookingAndReviewIntegrationTest {
     void acceptQuoteHappyPath() {
         TestSetup s = fullSetup();
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var resp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(s.ownerToken)), Map.class);
 
@@ -153,7 +153,7 @@ class BookingAndReviewIntegrationTest {
         TestSetup s = fullSetup();
         String otherOwnerToken = registerAndGetToken(uniqueEmail(), "CAR_OWNER");
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var resp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(otherOwnerToken)), String.class);
 
@@ -165,11 +165,22 @@ class BookingAndReviewIntegrationTest {
     void acceptQuoteGarageRejected() {
         TestSetup s = fullSetup();
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var resp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(s.garageToken)), String.class);
 
         assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+    }
+
+    @Test
+    void acceptOpenQuoteWithAddendumFlowTrueRejected() {
+        TestSetup s = fullSetup();
+
+        var body = Map.of("addendumFlow", true, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var resp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
+                new HttpEntity<>(body, bearerHeaders(s.ownerToken)), String.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
     }
 
     // Test 4: Accept quote — already accepted (second quote for same job)
@@ -188,7 +199,7 @@ class BookingAndReviewIntegrationTest {
         createGarageAndGetProfile(garageToken2);
         Map<String, Object> quote2 = submitQuote(garageToken2, jobId, 300.00);
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var resp1 = rest.exchange("/api/quotes/" + quote1.get("id") + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(ownerToken)), Map.class);
         assertEquals(HttpStatus.CREATED, resp1.getStatusCode());
@@ -203,7 +214,7 @@ class BookingAndReviewIntegrationTest {
     void listOwnBookingsCarOwner() {
         TestSetup s = fullSetup();
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(s.ownerToken)), Map.class);
 
@@ -223,7 +234,7 @@ class BookingAndReviewIntegrationTest {
     void listOwnBookingsGarage() {
         TestSetup s = fullSetup();
 
-        var body = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var body = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(s.ownerToken)), Map.class);
 
@@ -241,7 +252,7 @@ class BookingAndReviewIntegrationTest {
     void createReviewHappyPath() {
         TestSetup s = fullSetup();
 
-        var acceptBody = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var acceptBody = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var acceptResp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(acceptBody, bearerHeaders(s.ownerToken)), Map.class);
         String bookingId = acceptResp.getBody().get("id").toString();
@@ -266,7 +277,7 @@ class BookingAndReviewIntegrationTest {
     void createReviewNotYourBooking() {
         TestSetup s = fullSetup();
 
-        var acceptBody = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var acceptBody = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var acceptResp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(acceptBody, bearerHeaders(s.ownerToken)), Map.class);
         String bookingId = acceptResp.getBody().get("id").toString();
@@ -289,7 +300,7 @@ class BookingAndReviewIntegrationTest {
     void createReviewDuplicateRejected() {
         TestSetup s = fullSetup();
 
-        var acceptBody = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var acceptBody = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var acceptResp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(acceptBody, bearerHeaders(s.ownerToken)), Map.class);
         String bookingId = acceptResp.getBody().get("id").toString();
@@ -314,7 +325,7 @@ class BookingAndReviewIntegrationTest {
     void listReviewsForGaragePublic() {
         TestSetup s = fullSetup();
 
-        var acceptBody = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var acceptBody = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var acceptResp = rest.exchange("/api/quotes/" + s.quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(acceptBody, bearerHeaders(s.ownerToken)), Map.class);
         String bookingId = acceptResp.getBody().get("id").toString();
@@ -353,7 +364,7 @@ class BookingAndReviewIntegrationTest {
         assertEquals("PENDING", quote.get("status"));
         String quoteId = quote.get("id").toString();
 
-        var acceptBody = Map.of("scheduledDate", "2025-03-20", "scheduledTime", "10:00");
+        var acceptBody = Map.of("addendumFlow", false, "scheduledDate", "2025-03-20", "scheduledTime", "10:00");
         var bookingResp = rest.exchange("/api/quotes/" + quoteId + "/accept", HttpMethod.POST,
                 new HttpEntity<>(acceptBody, bearerHeaders(ownerToken)), Map.class);
         assertEquals(HttpStatus.CREATED, bookingResp.getStatusCode());

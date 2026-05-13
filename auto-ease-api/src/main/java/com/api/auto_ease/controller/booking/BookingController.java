@@ -25,7 +25,7 @@ public class BookingController {
     @PreAuthorize(HAS_ROLE_CAR_OWNER)
     public ResponseEntity<BookingResponse> acceptQuote(Authentication auth,
                                                        @PathVariable UUID quoteId,
-                                                       @RequestBody(required = false) AcceptQuoteRequest request) {
+                                                       @RequestBody AcceptQuoteRequest request) {
         String userId = (String) auth.getPrincipal();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.acceptQuote(userId, quoteId, request));

@@ -13,6 +13,7 @@ import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
+import com.api.auto_ease.service.quoteLog.QuoteLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class BookingService {
     private final QuoteRepository quoteRepository;
     private final JobRequestRepository jobRequestRepository;
     private final GarageRepository garageRepository;
+    private final QuoteLogService quoteLogService;
 
     @Transactional
     public BookingResponse acceptQuote(String ownerUserId, UUID quoteId, AcceptQuoteRequest request) {
@@ -46,22 +48,39 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this job request");
         }
 
-        if (jobRequest.getStatus() != JobRequestStatus.OPEN) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job request is no longer open");
+        if (request != null && request.getAddendumFlow() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Request body with addendumFlow is required");
+        }
+
+        boolean addendumFlow = request != null && Boolean.TRUE.equals(request.getAddendumFlow());
+        JobRequestStatus status = jobRequest.getStatus();
+        if (addendumFlow) {
+            if (status != JobRequestStatus.BOOKED && status != JobRequestStatus.IN_PROGRESS) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "addendumFlow=true is only allowed when job request status is BOOKED or IN_PROGRESS");
+            }
+        } else {
+            if (status != JobRequestStatus.OPEN) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "addendumFlow=false is only allowed when job request status is OPEN");
+            }
         }
 
         quote.setStatus(QuoteStatus.ACCEPTED);
         quoteRepository.save(quote);
 
-        List<Quote> allQuotes = quoteRepository.findByJobRequestId(jobRequest.getId());
-        List<Quote> toReject = allQuotes.stream()
-                .filter(otherQuote -> !otherQuote.getId().equals(quoteId))
-                .peek(otherQuote -> otherQuote.setStatus(QuoteStatus.REJECTED))
-                .toList();
-        quoteRepository.saveAll(toReject);
+        if (!addendumFlow) {
+            List<Quote> allQuotes = quoteRepository.findByJobRequestId(jobRequest.getId());
+            List<Quote> toReject = allQuotes.stream()
+                    .filter(otherQuote -> !otherQuote.getId().equals(quoteId))
+                    .peek(otherQuote -> otherQuote.setStatus(QuoteStatus.REJECTED))
+                    .toList();
+            quoteRepository.saveAll(toReject);
 
-        jobRequest.setStatus(JobRequestStatus.BOOKED);
-        jobRequestRepository.save(jobRequest);
+            jobRequest.setStatus(JobRequestStatus.BOOKED);
+            jobRequestRepository.save(jobRequest);
+        }
 
         Booking booking = new Booking();
         booking.setQuoteId(quoteId);
@@ -72,6 +91,10 @@ public class BookingService {
         booking.setStatus(BookingStatus.CONFIRMED);
         booking.setNotes(request != null ? request.getNotes() : null);
         booking = bookingRepository.save(booking);
+
+        if (addendumFlow) {
+            quoteLogService.recordCarOwnerDecision(quote, QuoteStatus.ACCEPTED, ownerUserId);
+        }
 
         Garage garage = garageRepository.findById(quote.getGarageId()).orElse(null);
         return toResponse(booking, quote, jobRequest, garage);

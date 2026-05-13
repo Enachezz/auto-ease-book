@@ -11,6 +11,7 @@ import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.service.garage.GarageService;
+import com.api.auto_ease.service.quoteLog.QuoteLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class QuoteService {
     private final JobRequestRepository jobRequestRepository;
     private final GarageRepository garageRepository;
     private final GarageService garageService;
+    private final QuoteLogService quoteLogService;
 
     @Transactional
     public QuoteResponse submitQuote(String garageUserId, UUID jobRequestId, CreateQuoteRequest request) {
@@ -67,6 +69,31 @@ public class QuoteService {
         return quoteRepository.findByJobRequestIdOrderByCreatedDateDesc(jobRequestId).stream()
                 .map(this::toResponse)
                 .toList();
+    }
+
+
+    @Transactional
+    public QuoteResponse rejectQuote(String ownerUserId, UUID quoteId) {
+        Quote quote = quoteRepository.findById(quoteId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quote not found"));
+
+        if (quote.getStatus() != QuoteStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quote is not pending");
+        }
+
+        JobRequest jobRequest = jobRequestRepository.findById(quote.getJobRequestId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
+
+        if (!jobRequest.getUserId().equals(ownerUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this job request");
+        }
+
+        quote.setStatus(QuoteStatus.REJECTED);
+        quote = quoteRepository.save(quote);
+
+        quoteLogService.recordCarOwnerDecision(quote, QuoteStatus.REJECTED, ownerUserId);
+
+        return toResponse(quote);
     }
 
     public List<QuoteResponse> getMyQuotes(String garageUserId) {

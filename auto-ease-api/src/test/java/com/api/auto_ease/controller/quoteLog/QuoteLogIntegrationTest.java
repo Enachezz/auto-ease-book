@@ -1,5 +1,6 @@
 package com.api.auto_ease.controller.quoteLog;
 
+import com.api.auto_ease.support.GarageTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,9 @@ class QuoteLogIntegrationTest {
         var resp = rest.exchange("/api/garages", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(token)), MAP_REF);
         assertEquals(HttpStatus.CREATED, resp.getStatusCode());
-        return resp.getBody();
+        Map<String, Object> profile = resp.getBody();
+        GarageTestSupport.approveGarage(rest, profile.get("id").toString());
+        return profile;
     }
 
     private Map<String, Object> submitQuote(String garageToken, String jobId, double price) {

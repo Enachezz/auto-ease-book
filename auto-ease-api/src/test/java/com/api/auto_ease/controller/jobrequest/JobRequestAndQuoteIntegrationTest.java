@@ -1,5 +1,6 @@
 package com.api.auto_ease.controller.jobrequest;
 
+import com.api.auto_ease.support.GarageTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,8 +110,10 @@ class JobRequestAndQuoteIntegrationTest {
                 "city", "București",
                 "phone", "+40741000000"
         );
-        rest.exchange("/api/garages", HttpMethod.POST,
+        var resp = rest.exchange("/api/garages", HttpMethod.POST,
                 new HttpEntity<>(garageBody, bearerHeaders(token)), Map.class);
+        assertEquals(HttpStatus.CREATED, resp.getStatusCode());
+        GarageTestSupport.approveGarage(rest, resp.getBody().get("id").toString());
     }
 
     // Test 1: Create job request — happy path

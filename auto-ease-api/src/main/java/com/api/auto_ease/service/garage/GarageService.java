@@ -24,11 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -73,12 +69,32 @@ public class GarageService {
     }
 
     public GarageResponse getPublicGarageById(UUID id) {
-        Garage garage = garageRepository.findById(id)
+        return toResponse(getApprovedGarageById(id));
+    }
+
+    @Transactional(readOnly = true)
+    public Garage getApprovedGarageById(UUID id) {
+        return garageRepository.findByIdAndIsApprovedTrue(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
-        if (!Boolean.TRUE.equals(garage.getIsApproved())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found");
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Garage> findApprovedGarageById(UUID id) {
+        return garageRepository.findByIdAndIsApprovedTrue(id);
+    }
+
+    public void assertGarageIsApproved(Garage garage) {
+        if (garage == null || !Boolean.TRUE.equals(garage.getIsApproved())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Garage is not approved");
         }
-        return toResponse(garage);
+    }
+
+    @Transactional(readOnly = true)
+    public Garage requireApprovedGarageForUser(String garageUserId) {
+        Garage garage = garageRepository.findByUserId(garageUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Garage profile required"));
+        assertGarageIsApproved(garage);
+        return garage;
     }
 
     public PagedGaragesResponse searchApprovedGarages(GarageSearchRequest request) {

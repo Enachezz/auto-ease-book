@@ -33,8 +33,7 @@ public class QuoteService {
 
     @Transactional
     public QuoteResponse submitQuote(String garageUserId, UUID jobRequestId, CreateQuoteRequest request) {
-        Garage garage = garageRepository.findByUserId(garageUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "You must create a garage profile first"));
+        Garage garage = garageService.requireApprovedGarageForUser(garageUserId);
 
         JobRequest jobRequest = jobRequestRepository.findById(jobRequestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
@@ -67,6 +66,7 @@ public class QuoteService {
         }
 
         return quoteRepository.findByJobRequestIdOrderByCreatedDateDesc(jobRequestId).stream()
+                .filter(quote -> garageService.findApprovedGarageById(quote.getGarageId()).isPresent())
                 .map(this::toResponse)
                 .toList();
     }
@@ -106,7 +106,7 @@ public class QuoteService {
     }
 
     private QuoteResponse toResponse(Quote quote) {
-        Garage garage = garageRepository.findById(quote.getGarageId()).orElse(null);
+        Garage garage = garageService.findApprovedGarageById(quote.getGarageId()).orElse(null);
         return toResponse(quote, garage);
     }
 

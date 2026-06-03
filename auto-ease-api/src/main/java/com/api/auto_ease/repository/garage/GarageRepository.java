@@ -17,4 +17,6 @@ public interface GarageRepository extends JpaRepository<Garage, UUID>, JpaSpecif
     boolean existsByUserId(String userId);
 
     List<Garage> findByIsApprovedTrue();
+
+    Optional<Garage> findByIdAndIsApprovedTrue(UUID id);
 }

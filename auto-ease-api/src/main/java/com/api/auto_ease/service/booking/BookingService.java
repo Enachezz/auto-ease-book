@@ -9,10 +9,12 @@ import com.api.auto_ease.domain.quote.Quote;
 import com.api.auto_ease.domain.quote.QuoteStatus;
 import com.api.auto_ease.dto.booking.AcceptQuoteRequest;
 import com.api.auto_ease.dto.booking.BookingResponse;
+import com.api.auto_ease.dto.garage.GarageResponse;
 import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import com.api.auto_ease.service.quoteLog.QuoteLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final QuoteRepository quoteRepository;
     private final JobRequestRepository jobRequestRepository;
+    private final GarageService garageService;
     private final GarageRepository garageRepository;
     private final QuoteLogService quoteLogService;
 
@@ -47,6 +50,8 @@ public class BookingService {
         if (!jobRequest.getUserId().equals(ownerUserId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this job request");
         }
+
+        garageService.getApprovedGarageById(quote.getGarageId());
 
         if (request != null && request.getAddendumFlow() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -96,7 +101,7 @@ public class BookingService {
             quoteLogService.recordCarOwnerDecision(quote, QuoteStatus.ACCEPTED, ownerUserId);
         }
 
-        Garage garage = garageRepository.findById(quote.getGarageId()).orElse(null);
+        Garage garage = garageService.findApprovedGarageById(quote.getGarageId()).orElse(null);
         return toResponse(booking, quote, jobRequest, garage);
     }
 
@@ -142,7 +147,9 @@ public class BookingService {
                 .map(booking -> {
                     Quote quote = quoteById.get(booking.getQuoteId());
                     JobRequest jobRequest = jobRequestByQuoteId.get(booking.getQuoteId());
-                    Garage garage = quote != null ? garageRepository.findById(quote.getGarageId()).orElse(null) : null;
+                    Garage garage = quote != null
+                            ? garageService.findApprovedGarageById(quote.getGarageId()).orElse(null)
+                            : null;
                     return toResponse(booking, quote, jobRequest, garage);
                 })
                 .toList();

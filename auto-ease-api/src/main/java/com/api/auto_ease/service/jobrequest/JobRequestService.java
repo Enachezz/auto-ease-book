@@ -15,11 +15,11 @@ import com.api.auto_ease.dto.jobrequest.UpdateJobRequestRequest;
 import com.api.auto_ease.repository.car.CarRepository;
 import com.api.auto_ease.repository.carMake.CarMakeRepository;
 import com.api.auto_ease.repository.carModel.CarModelRepository;
-import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.garageCategory.GarageCategoryAssignmentRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.repository.serviceCategory.ServiceCategoryRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,8 +41,8 @@ public class JobRequestService {
     private final QuoteRepository quoteRepository;
     private final CarMakeRepository carMakeRepository;
     private final CarModelRepository carModelRepository;
-    private final GarageRepository garageRepository;
     private final GarageCategoryAssignmentRepository garageCategoryAssignmentRepository;
+    private final GarageService garageService;
 
     @Transactional
     public JobRequestResponse createJobRequest(String userId, CreateJobRequestRequest request) {
@@ -106,8 +106,7 @@ public class JobRequestService {
      */
     @Transactional(readOnly = true)
     public List<JobRequestResponse> getOpenJobRequestsForGarageUser(String garageUserId, UUID categoryId) {
-        Garage garage = garageRepository.findByUserId(garageUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Garage profile required"));
+        Garage garage = garageService.requireApprovedGarageForUser(garageUserId);
         Set<UUID> acceptedIds = new HashSet<>();
         for (GarageCategoryAssignment assignment : garageCategoryAssignmentRepository.findByGarage_Id(garage.getId())) {
             acceptedIds.add(assignment.getCategory().getId());

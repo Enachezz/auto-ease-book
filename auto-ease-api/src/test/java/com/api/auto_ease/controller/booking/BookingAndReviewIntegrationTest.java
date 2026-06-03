@@ -3,6 +3,7 @@ package com.api.auto_ease.controller.booking;
 import com.api.auto_ease.domain.booking.Booking;
 import com.api.auto_ease.domain.booking.BookingStatus;
 import com.api.auto_ease.repository.booking.BookingRepository;
+import com.api.auto_ease.support.GarageTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,9 @@ class BookingAndReviewIntegrationTest {
         var resp = rest.exchange("/api/garages", HttpMethod.POST,
                 new HttpEntity<>(body, bearerHeaders(token)), Map.class);
         assertEquals(HttpStatus.CREATED, resp.getStatusCode());
-        return resp.getBody();
+        Map<String, Object> profile = resp.getBody();
+        GarageTestSupport.approveGarage(rest, profile.get("id").toString());
+        return profile;
     }
 
     private Map<String, Object> submitQuote(String garageToken, String jobId, double price) {

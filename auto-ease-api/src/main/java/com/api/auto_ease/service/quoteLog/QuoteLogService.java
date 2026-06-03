@@ -14,6 +14,7 @@ import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.repository.quoteLog.QuoteLogRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,14 +40,14 @@ public class QuoteLogService {
     private final QuoteRepository quoteRepository;
     private final JobRequestRepository jobRequestRepository;
     private final GarageRepository garageRepository;
+    private final GarageService garageService;
 
     @Transactional
     public QuoteLogResponse createLog(String garageUserId, UUID quoteId, CreateQuoteLogRequest request) {
         Quote quote = quoteRepository.findById(quoteId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quote not found"));
 
-        Garage garage = garageRepository.findByUserId(garageUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Garage profile required"));
+        Garage garage = garageService.requireApprovedGarageForUser(garageUserId);
 
         if (!quote.getGarageId().equals(garage.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own the garage on this quote");

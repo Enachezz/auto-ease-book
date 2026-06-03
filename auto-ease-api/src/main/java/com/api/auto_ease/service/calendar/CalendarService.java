@@ -5,6 +5,7 @@ import com.api.auto_ease.domain.garage.Garage;
 import com.api.auto_ease.dto.calendar.CalendarResponse;
 import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,11 @@ public class CalendarService {
 
     private final GarageRepository garageRepository;
     private final BookingRepository bookingRepository;
+    private final GarageService garageService;
 
     @Transactional(readOnly = true)
     public List<CalendarResponse> getPublicCalendarForGarage(UUID garageId, Integer year, Integer month) {
-        Garage garage = garageRepository.findById(garageId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
-        if (!Boolean.TRUE.equals(garage.getIsApproved())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found");
-        }
+        Garage garage = garageService.getApprovedGarageById(garageId);
         return loadEntries(garage.getId(), parseMonthFilter(year, month));
     }
 

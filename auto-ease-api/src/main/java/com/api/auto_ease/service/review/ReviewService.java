@@ -13,6 +13,7 @@ import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.repository.review.ReviewRepository;
+import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class ReviewService {
     private final QuoteRepository quoteRepository;
     private final JobRequestRepository jobRequestRepository;
     private final GarageRepository garageRepository;
+    private final GarageService garageService;
 
     @Transactional
     public ReviewResponse createReview(String userId, UUID bookingId, CreateReviewRequest request) {
@@ -67,6 +69,7 @@ public class ReviewService {
     }
 
     public List<ReviewResponse> getReviewsForGarage(UUID garageId) {
+        garageService.getApprovedGarageById(garageId);
         return reviewRepository.findByGarageIdOrderByCreatedDateDesc(garageId).stream()
                 .map(this::toResponse)
                 .toList();

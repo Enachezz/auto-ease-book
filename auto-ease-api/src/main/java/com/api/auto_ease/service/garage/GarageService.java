@@ -1,7 +1,9 @@
 package com.api.auto_ease.service.garage;
 
+import com.api.auto_ease.domain.carMake.CarMake;
 import com.api.auto_ease.domain.garage.Garage;
 import com.api.auto_ease.domain.garageCategory.GarageCategoryAssignment;
+import com.api.auto_ease.domain.garageMake.GarageMakeAssignment;
 import com.api.auto_ease.domain.serviceCategory.ServiceCategory;
 import com.api.auto_ease.dto.garage.CreateGarageRequest;
 import com.api.auto_ease.dto.garage.GarageFilterCriteria;
@@ -9,9 +11,12 @@ import com.api.auto_ease.dto.garage.GarageResponse;
 import com.api.auto_ease.dto.garage.GarageSearchRequest;
 import com.api.auto_ease.dto.garage.PagedGaragesResponse;
 import com.api.auto_ease.dto.garage.UpdateGarageRequest;
+import com.api.auto_ease.dto.referencedata.CarMakeResponse;
 import com.api.auto_ease.dto.referencedata.ServiceCategoryResponse;
+import com.api.auto_ease.repository.carMake.CarMakeRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.garageCategory.GarageCategoryAssignmentRepository;
+import com.api.auto_ease.repository.garageMake.GarageMakeAssignmentRepository;
 import com.api.auto_ease.repository.serviceCategory.ServiceCategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,10 +36,13 @@ import java.util.*;
 public class GarageService {
 
     public static final int GARAGE_SEARCH_PAGE_SIZE = 20;
+    public static final int MAX_SERVICEABLE_MAKES = 5;
 
     private final GarageRepository garageRepository;
     private final ServiceCategoryRepository serviceCategoryRepository;
     private final GarageCategoryAssignmentRepository garageCategoryAssignmentRepository;
+    private final CarMakeRepository carMakeRepository;
+    private final GarageMakeAssignmentRepository garageMakeAssignmentRepository;
 
     @Transactional
     public GarageResponse createGarage(String userId, CreateGarageRequest request) {
@@ -223,6 +231,44 @@ public class GarageService {
                 .map(category -> new GarageCategoryAssignment(garage, category))
                 .toList();
         garageCategoryAssignmentRepository.saveAll(assignments);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CarMakeResponse> getServiceableMakesForGarageUser(String garageUserId) {
+        Garage garage = garageRepository.findByUserId(garageUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+        return garageMakeAssignmentRepository.findByGarage_Id(garage.getId()).stream()
+                .map(GarageMakeAssignment::getMake)
+                .map(this::toMakeResponse)
+                .sorted(Comparator.comparing(CarMakeResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .toList();
+    }
+
+    @Transactional
+    public void replaceServiceableMakesForGarageUser(String garageUserId, Set<UUID> makeIds) {
+        Garage garage = garageRepository.findByUserId(garageUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+        Set<UUID> unique = new LinkedHashSet<>(makeIds);
+        if (unique.size() > MAX_SERVICEABLE_MAKES) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A garage can have at most " + MAX_SERVICEABLE_MAKES + " serviceable car brands");
+        }
+        garageMakeAssignmentRepository.deleteByGarage_Id(garage.getId());
+        if (unique.isEmpty()) {
+            return;
+        }
+        List<CarMake> resolved = carMakeRepository.findAllById(unique);
+        if (resolved.size() != unique.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more car brand ids are invalid");
+        }
+        List<GarageMakeAssignment> assignments = resolved.stream()
+                .map(make -> new GarageMakeAssignment(garage, make))
+                .toList();
+        garageMakeAssignmentRepository.saveAll(assignments);
+    }
+
+    private CarMakeResponse toMakeResponse(CarMake make) {
+        return new CarMakeResponse(make.getId(), make.getName());
     }
 
     private ServiceCategoryResponse toCategoryResponse(ServiceCategory c) {

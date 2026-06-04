@@ -30,4 +30,10 @@ public class GarageFilterCriteria {
      * Null applies no dealership filter.
      */
     private Boolean isDealership;
+
+    /**
+     * When non-null, only garages linked to this {@link com.api.auto_ease.domain.carMake.CarMake} id
+     * (via {@link com.api.auto_ease.domain.garageMake.GarageMakeAssignment}). Null applies no brand filter.
+     */
+    private UUID makeId;
 }

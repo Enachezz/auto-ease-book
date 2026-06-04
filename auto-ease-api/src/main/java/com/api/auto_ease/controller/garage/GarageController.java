@@ -6,7 +6,9 @@ import com.api.auto_ease.dto.garage.GarageResponse;
 import com.api.auto_ease.dto.garage.GarageSearchRequest;
 import com.api.auto_ease.dto.garage.PagedGaragesResponse;
 import com.api.auto_ease.dto.garage.SetGarageCategoriesRequest;
+import com.api.auto_ease.dto.garage.SetGarageMakesRequest;
 import com.api.auto_ease.dto.garage.UpdateGarageRequest;
+import com.api.auto_ease.dto.referencedata.CarMakeResponse;
 import com.api.auto_ease.dto.referencedata.ServiceCategoryResponse;
 import com.api.auto_ease.service.garage.GarageService;
 import com.api.auto_ease.service.serviceEntry.ServiceEntryService;
@@ -82,6 +84,20 @@ public class GarageController {
     public ResponseEntity<Void> replaceMyAcceptedCategories(Authentication auth,
                                                             @Valid @RequestBody SetGarageCategoriesRequest request) {
         garageService.replaceAcceptedCategoriesForGarageUser((String) auth.getPrincipal(), request.getCategoryIds());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/garages/me/makes")
+    @PreAuthorize(HAS_ROLE_GARAGE)
+    public List<CarMakeResponse> getMyServiceableMakes(Authentication auth) {
+        return garageService.getServiceableMakesForGarageUser((String) auth.getPrincipal());
+    }
+
+    @PutMapping("/api/garages/me/makes")
+    @PreAuthorize(HAS_ROLE_GARAGE)
+    public ResponseEntity<Void> replaceMyServiceableMakes(Authentication auth,
+                                                          @Valid @RequestBody SetGarageMakesRequest request) {
+        garageService.replaceServiceableMakesForGarageUser((String) auth.getPrincipal(), request.getMakeIds());
         return ResponseEntity.noContent().build();
     }
 

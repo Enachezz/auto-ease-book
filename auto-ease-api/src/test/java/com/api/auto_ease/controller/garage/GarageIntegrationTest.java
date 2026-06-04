@@ -79,6 +79,15 @@ class GarageIntegrationTest {
         return resp.getBody();
     }
 
+    private List<Map<String, Object>> listCarMakes() {
+        var resp = rest.exchange("/api/car-makes", HttpMethod.GET, null,
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertNotNull(resp.getBody());
+        assertFalse(resp.getBody().isEmpty());
+        return resp.getBody();
+    }
+
     private Map<String, Object> garageBody() {
         return Map.of(
                 "businessName", "AutoService Pro",
@@ -311,6 +320,105 @@ class GarageIntegrationTest {
 
         var searchReq = Map.of(
                 "filter", Map.of("categoryIds", List.of(categoryA)),
+                "page", 0
+        );
+        var searchResp = rest.exchange("/api/garages/search", HttpMethod.POST,
+                new HttpEntity<>(searchReq), Map.class);
+        assertEquals(HttpStatus.OK, searchResp.getStatusCode());
+        assertNotNull(searchResp.getBody());
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> garages = (List<Map<String, Object>>) searchResp.getBody().get("garages");
+        assertNotNull(garages);
+
+        boolean containsA = garages.stream().anyMatch(g -> garageIdA.equals(String.valueOf(g.get("id"))));
+        boolean containsB = garages.stream().anyMatch(g -> garageIdB.equals(String.valueOf(g.get("id"))));
+        assertTrue(containsA, "Expected filtered results to include garage A");
+        assertFalse(containsB, "Expected filtered results to exclude garage B");
+    }
+
+    @Test
+    void updateMyMakesHappyPath() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        createGarageAndGetId(garageToken, "Makes Happy Path Garage");
+
+        List<Map<String, Object>> makes = listCarMakes();
+        String toyotaId = makes.stream()
+                .filter(make -> "Toyota".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
+                .findFirst()
+                .orElseThrow();
+
+        var setReq = Map.of("makeIds", List.of(toyotaId));
+        var setResp = rest.exchange("/api/garages/me/makes", HttpMethod.PUT,
+                new HttpEntity<>(setReq, bearerHeaders(garageToken)), Void.class);
+        assertEquals(HttpStatus.NO_CONTENT, setResp.getStatusCode());
+
+        var getResp = rest.exchange("/api/garages/me/makes", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(garageToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, getResp.getStatusCode());
+        assertNotNull(getResp.getBody());
+        assertEquals(1, getResp.getBody().size());
+        assertEquals(toyotaId, getResp.getBody().get(0).get("id").toString());
+        assertEquals("Toyota", getResp.getBody().get(0).get("name"));
+    }
+
+    @Test
+    void updateMyMakesMoreThanFiveRejected() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        createGarageAndGetId(garageToken, "Makes Limit Garage");
+
+        List<String> makeIds = listCarMakes().stream()
+                .map(make -> make.get("id").toString())
+                .limit(6)
+                .toList();
+        assertEquals(6, makeIds.size());
+
+        var setReq = Map.of("makeIds", makeIds);
+        var setResp = rest.exchange("/api/garages/me/makes", HttpMethod.PUT,
+                new HttpEntity<>(setReq, bearerHeaders(garageToken)), String.class);
+        assertEquals(HttpStatus.BAD_REQUEST, setResp.getStatusCode());
+    }
+
+    @Test
+    void searchGaragesFiltersByServiceableMake() {
+        String garageTokenA = registerAndGetToken(uniqueEmail(), "GARAGE");
+        String garageTokenB = registerAndGetToken(uniqueEmail(), "GARAGE");
+        String garageIdA = createGarageAndGetId(garageTokenA, "Filter Make Garage A");
+        String garageIdB = createGarageAndGetId(garageTokenB, "Filter Make Garage B");
+
+        String adminToken = adminToken();
+        var approveA = rest.exchange("/api/garages/" + garageIdA + "/approve", HttpMethod.PATCH,
+                new HttpEntity<>(bearerHeaders(adminToken)), Map.class);
+        var approveB = rest.exchange("/api/garages/" + garageIdB + "/approve", HttpMethod.PATCH,
+                new HttpEntity<>(bearerHeaders(adminToken)), Map.class);
+        assertEquals(HttpStatus.OK, approveA.getStatusCode());
+        assertEquals(HttpStatus.OK, approveB.getStatusCode());
+
+        List<Map<String, Object>> makes = listCarMakes();
+        String toyotaId = makes.stream()
+                .filter(make -> "Toyota".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
+                .findFirst()
+                .orElseThrow();
+        String hondaId = makes.stream()
+                .filter(make -> "Honda".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
+                .findFirst()
+                .orElseThrow();
+
+        var setA = Map.of("makeIds", List.of(toyotaId));
+        var setB = Map.of("makeIds", List.of(hondaId));
+        var setRespA = rest.exchange("/api/garages/me/makes", HttpMethod.PUT,
+                new HttpEntity<>(setA, bearerHeaders(garageTokenA)), Void.class);
+        var setRespB = rest.exchange("/api/garages/me/makes", HttpMethod.PUT,
+                new HttpEntity<>(setB, bearerHeaders(garageTokenB)), Void.class);
+        assertEquals(HttpStatus.NO_CONTENT, setRespA.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, setRespB.getStatusCode());
+
+        var searchReq = Map.of(
+                "filter", Map.of("makeId", toyotaId),
                 "page", 0
         );
         var searchResp = rest.exchange("/api/garages/search", HttpMethod.POST,

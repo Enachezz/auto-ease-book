@@ -2,6 +2,7 @@ package com.api.auto_ease.service.garage;
 
 import com.api.auto_ease.domain.garage.Garage;
 import com.api.auto_ease.domain.garageCategory.GarageCategoryAssignment;
+import com.api.auto_ease.domain.garageMake.GarageMakeAssignment;
 import com.api.auto_ease.dto.garage.GarageFilterCriteria;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
@@ -51,6 +52,18 @@ final class GarageSpecifications {
             }
             if (criteria.getIsDealership() != null) {
                 predicates.add(cb.equal(root.get("dealership"), criteria.getIsDealership()));
+            }
+            if (criteria.getMakeId() != null) {
+                Subquery<Integer> hasMake = query.subquery(Integer.class);
+                Root<GarageMakeAssignment> makeAssign = hasMake.from(GarageMakeAssignment.class);
+                hasMake.select(cb.literal(1));
+                hasMake.where(
+                        cb.and(
+                                cb.equal(makeAssign.get("garage").get("id"), root.get("id")),
+                                cb.equal(makeAssign.get("make").get("id"), criteria.getMakeId())
+                        )
+                );
+                predicates.add(cb.exists(hasMake));
             }
             if (predicates.isEmpty()) {
                 return cb.conjunction();

@@ -12,5 +12,7 @@ class AppUserTypeSecurityExpressionsTest {
         assertEquals("hasRole('" + AppUserType.CAR_OWNER.name() + "')", AppUserTypeSecurityExpressions.HAS_ROLE_CAR_OWNER);
         assertEquals("hasRole('" + AppUserType.GARAGE.name() + "')", AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE);
         assertEquals("hasRole('" + AppUserType.ADMIN.name() + "')", AppUserTypeSecurityExpressions.HAS_ROLE_ADMIN);
+        assertEquals("hasRole('" + AppUserType.GARAGE.name() + "') or hasRole('" + AppUserType.ADMIN.name() + "')",
+                AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE_OR_ADMIN);
     }
 }

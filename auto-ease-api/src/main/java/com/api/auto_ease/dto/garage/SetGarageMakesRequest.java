@@ -17,6 +17,11 @@ import java.util.UUID;
 @AllArgsConstructor
 public class SetGarageMakesRequest {
 
+    /**
+     * Required when the caller is an admin; ignored for garage owners (they always update their own garage).
+     */
+    private UUID garageId;
+
     @NotNull
     @Size(max = 5)
     @Builder.Default

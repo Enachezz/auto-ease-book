@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.UUID;
 
 import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_ADMIN;
 import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE;
+import static com.api.auto_ease.security.AppUserTypeSecurityExpressions.HAS_ROLE_GARAGE_OR_ADMIN;
 
 @RestController
 @RequiredArgsConstructor
@@ -88,16 +90,17 @@ public class GarageController {
     }
 
     @GetMapping("/api/garages/me/makes")
-    @PreAuthorize(HAS_ROLE_GARAGE)
-    public List<CarMakeResponse> getMyServiceableMakes(Authentication auth) {
-        return garageService.getServiceableMakesForGarageUser((String) auth.getPrincipal());
+    @PreAuthorize(HAS_ROLE_GARAGE_OR_ADMIN)
+    public List<CarMakeResponse> getMyServiceableMakes(Authentication auth,
+                                                       @RequestParam(required = false) UUID garageId) {
+        return garageService.getServiceableMakes(auth, garageId);
     }
 
     @PutMapping("/api/garages/me/makes")
-    @PreAuthorize(HAS_ROLE_GARAGE)
+    @PreAuthorize(HAS_ROLE_GARAGE_OR_ADMIN)
     public ResponseEntity<Void> replaceMyServiceableMakes(Authentication auth,
                                                           @Valid @RequestBody SetGarageMakesRequest request) {
-        garageService.replaceServiceableMakesForGarageUser((String) auth.getPrincipal(), request.getMakeIds());
+        garageService.replaceServiceableMakes(auth, request.getGarageId(), request.getMakeIds());
         return ResponseEntity.noContent().build();
     }
 

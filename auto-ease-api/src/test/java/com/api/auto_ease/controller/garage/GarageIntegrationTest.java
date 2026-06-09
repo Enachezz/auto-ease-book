@@ -435,4 +435,35 @@ class GarageIntegrationTest {
         assertTrue(containsA, "Expected filtered results to include garage A");
         assertFalse(containsB, "Expected filtered results to exclude garage B");
     }
+
+    @Test
+    void adminCanUpdateGarageMakesViaSameEndpoint() {
+        String garageToken = registerAndGetToken(uniqueEmail(), "GARAGE");
+        String garageId = createGarageAndGetId(garageToken, "Admin Makes Garage");
+
+        List<Map<String, Object>> makes = listCarMakes();
+        String hondaId = makes.stream()
+                .filter(make -> "Honda".equals(make.get("name")))
+                .map(make -> make.get("id").toString())
+                .findFirst()
+                .orElseThrow();
+
+        String adminToken = adminToken();
+        var setReq = Map.of(
+                "garageId", garageId,
+                "makeIds", List.of(hondaId)
+        );
+        var setResp = rest.exchange("/api/garages/me/makes", HttpMethod.PUT,
+                new HttpEntity<>(setReq, bearerHeaders(adminToken)), Void.class);
+        assertEquals(HttpStatus.NO_CONTENT, setResp.getStatusCode());
+
+        var getResp = rest.exchange("/api/garages/me/makes?garageId=" + garageId, HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(adminToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, getResp.getStatusCode());
+        assertNotNull(getResp.getBody());
+        assertEquals(1, getResp.getBody().size());
+        assertEquals(hondaId, getResp.getBody().get(0).get("id").toString());
+        assertEquals("Honda", getResp.getBody().get(0).get("name"));
+    }
 }

@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -234,9 +235,8 @@ public class GarageService {
     }
 
     @Transactional(readOnly = true)
-    public List<CarMakeResponse> getServiceableMakesForGarageUser(String garageUserId) {
-        Garage garage = garageRepository.findByUserId(garageUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+    public List<CarMakeResponse> getServiceableMakes(Authentication auth, UUID garageId) {
+        Garage garage = resolveGarageForMakesManagement(auth, garageId);
         return garageMakeAssignmentRepository.findByGarage_Id(garage.getId()).stream()
                 .map(GarageMakeAssignment::getMake)
                 .map(this::toMakeResponse)
@@ -245,9 +245,8 @@ public class GarageService {
     }
 
     @Transactional
-    public void replaceServiceableMakesForGarageUser(String garageUserId, Set<UUID> makeIds) {
-        Garage garage = garageRepository.findByUserId(garageUserId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+    public void replaceServiceableMakes(Authentication auth, UUID garageId, Set<UUID> makeIds) {
+        Garage garage = resolveGarageForMakesManagement(auth, garageId);
         Set<UUID> unique = new LinkedHashSet<>(makeIds);
         if (unique.size() > MAX_SERVICEABLE_MAKES) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -265,6 +264,27 @@ public class GarageService {
                 .map(make -> new GarageMakeAssignment(garage, make))
                 .toList();
         garageMakeAssignmentRepository.saveAll(assignments);
+    }
+
+    private Garage resolveGarageForMakesManagement(Authentication auth, UUID garageId) {
+        if (isAdmin(auth)) {
+            if (garageId == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "garageId is required");
+            }
+            return garageRepository.findById(garageId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+        }
+        Garage garage = garageRepository.findByUserId((String) auth.getPrincipal())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Garage not found"));
+        if (garageId != null && !garage.getId().equals(garageId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized for this garage");
+        }
+        return garage;
+    }
+
+    private boolean isAdmin(Authentication auth) {
+        return auth.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
     private CarMakeResponse toMakeResponse(CarMake make) {

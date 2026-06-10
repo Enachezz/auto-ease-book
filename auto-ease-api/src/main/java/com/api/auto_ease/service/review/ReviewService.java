@@ -1,17 +1,19 @@
 package com.api.auto_ease.service.review;
 
-import com.api.auto_ease.domain.booking.Booking;
-import com.api.auto_ease.domain.booking.BookingStatus;
 import com.api.auto_ease.domain.garage.Garage;
 import com.api.auto_ease.domain.jobrequest.JobRequest;
+import com.api.auto_ease.domain.jobrequest.JobRequestStatus;
 import com.api.auto_ease.domain.quote.Quote;
+import com.api.auto_ease.domain.quote.QuoteStatus;
 import com.api.auto_ease.domain.review.Review;
+import com.api.auto_ease.domain.review.ReviewReply;
 import com.api.auto_ease.dto.review.CreateReviewRequest;
+import com.api.auto_ease.dto.review.ReviewReplyResponse;
 import com.api.auto_ease.dto.review.ReviewResponse;
-import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
+import com.api.auto_ease.repository.review.ReviewReplyRepository;
 import com.api.auto_ease.repository.review.ReviewRepository;
 import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
@@ -30,49 +32,56 @@ import java.util.UUID;
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
-    private final BookingRepository bookingRepository;
-    private final QuoteRepository quoteRepository;
+    private final ReviewReplyRepository reviewReplyRepository;
     private final JobRequestRepository jobRequestRepository;
+    private final QuoteRepository quoteRepository;
     private final GarageRepository garageRepository;
     private final GarageService garageService;
 
     @Transactional
-    public ReviewResponse createReview(String userId, UUID bookingId, CreateReviewRequest request) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
-
-        Quote quote = quoteRepository.findById(booking.getQuoteId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quote not found"));
-
-        JobRequest jobRequest = jobRequestRepository.findById(quote.getJobRequestId())
+    public ReviewResponse createReview(String userId, UUID jobRequestId, CreateReviewRequest request) {
+        JobRequest jobRequest = jobRequestRepository.findById(jobRequestId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
 
         if (!jobRequest.getUserId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this booking");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not own this job request");
         }
 
-        if (booking.getStatus() != BookingStatus.COMPLETED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking is not completed");
+        if (jobRequest.getStatus() != JobRequestStatus.COMPLETED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job request is not completed");
         }
 
-        if (reviewRepository.existsByBookingId(bookingId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Review already exists for this booking");
+        if (reviewRepository.existsByJobRequestId(jobRequestId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Review already exists for this job request");
         }
 
-        Review review = new Review(null, bookingId, quote.getGarageId(), userId,
+        UUID garageId = resolveGarageIdForJob(jobRequestId);
+
+        Review review = new Review(null, jobRequestId, garageId, userId,
                 request.getRating(), request.getComment(), null, null);
         review = reviewRepository.save(review);
 
-        updateGarageRating(quote.getGarageId());
+        updateGarageRating(garageId);
 
-        return toResponse(review);
+        return toResponse(review, List.of());
     }
 
     public List<ReviewResponse> getReviewsForGarage(UUID garageId) {
         garageService.getApprovedGarageById(garageId);
         return reviewRepository.findByGarageIdOrderByCreatedDateDesc(garageId).stream()
-                .map(this::toResponse)
+                .map(review -> {
+                    List<ReviewReply> replies = reviewReplyRepository.findByReviewIdOrderByCreatedDateAsc(review.getId());
+                    return toResponse(review, replies);
+                })
                 .toList();
+    }
+
+    private UUID resolveGarageIdForJob(UUID jobRequestId) {
+        List<Quote> acceptedQuotes = quoteRepository.findByJobRequestIdAndStatus(jobRequestId, QuoteStatus.ACCEPTED);
+        if (acceptedQuotes.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No accepted quotes for this job request");
+        }
+        return acceptedQuotes.get(0).getGarageId();
     }
 
     private void updateGarageRating(UUID garageId) {
@@ -81,24 +90,57 @@ public class ReviewService {
 
         List<Review> reviews = reviewRepository.findByGarageIdOrderByCreatedDateDesc(garageId);
         int totalReviews = reviews.size();
-        BigDecimal avgRating = reviews.stream()
-                .map(review -> BigDecimal.valueOf(review.getRating()))
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(totalReviews), 2, RoundingMode.HALF_UP);
-
-        garage.setTotalReviews(totalReviews);
-        garage.setAverageRating(avgRating);
+        if (totalReviews == 0) {
+            garage.setTotalReviews(0);
+            garage.setAverageRating(BigDecimal.ZERO);
+        } else {
+            BigDecimal avgRating = reviews.stream()
+                    .map(review -> BigDecimal.valueOf(review.getRating()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(totalReviews), 2, RoundingMode.HALF_UP);
+            garage.setTotalReviews(totalReviews);
+            garage.setAverageRating(avgRating);
+        }
         garageRepository.save(garage);
     }
 
-    private ReviewResponse toResponse(Review review) {
+    ReviewResponse toResponse(Review review, List<ReviewReply> replies) {
+        Garage garage = garageRepository.findById(review.getGarageId()).orElse(null);
+        String garageOwnerUserId = garage != null ? garage.getUserId() : null;
+
+        List<ReviewReplyResponse> replyResponses = replies.stream()
+                .map(reply -> toReplyResponse(reply, garageOwnerUserId, review.getUserId()))
+                .toList();
+
         return ReviewResponse.builder()
                 .id(review.getId())
-                .bookingId(review.getBookingId())
+                .jobRequestId(review.getJobRequestId())
                 .garageId(review.getGarageId())
                 .userId(review.getUserId())
                 .rating(review.getRating())
                 .comment(review.getComment())
+                .createdDate(review.getCreatedDate())
+                .replies(replyResponses)
+                .build();
+    }
+
+    private ReviewReplyResponse toReplyResponse(ReviewReply reply, String garageOwnerUserId, String reviewAuthorUserId) {
+        String authorRole;
+        if (reply.getAuthorUserId().equals(reviewAuthorUserId)) {
+            authorRole = "CAR_OWNER";
+        } else if (garageOwnerUserId != null && reply.getAuthorUserId().equals(garageOwnerUserId)) {
+            authorRole = "GARAGE";
+        } else {
+            authorRole = "UNKNOWN";
+        }
+
+        return ReviewReplyResponse.builder()
+                .id(reply.getId())
+                .authorUserId(reply.getAuthorUserId())
+                .authorRole(authorRole)
+                .message(reply.getMessage())
+                .parentReplyId(reply.getParentReplyId())
+                .createdDate(reply.getCreatedDate())
                 .build();
     }
 }

@@ -33,4 +33,6 @@ public class JobRequestResponse {
     private String locationCity;
     private String locationState;
     private Integer quoteCount;
+    private Boolean reviewEligible;
+    private UUID reviewId;
 }

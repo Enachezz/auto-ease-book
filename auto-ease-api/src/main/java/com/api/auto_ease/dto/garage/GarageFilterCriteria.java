@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,4 +37,14 @@ public class GarageFilterCriteria {
      * (via {@link com.api.auto_ease.domain.garageMake.GarageMakeAssignment}). Null applies no brand filter.
      */
     private UUID makeId;
+
+    /**
+     * When non-null, only garages with {@code averageRating >= minRating}.
+     */
+    private BigDecimal minRating;
+
+    /**
+     * When non-null, only garages with {@code totalReviews >= minReviews}.
+     */
+    private Integer minReviews;
 }

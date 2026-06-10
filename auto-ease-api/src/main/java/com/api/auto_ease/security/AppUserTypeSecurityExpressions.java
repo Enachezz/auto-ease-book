@@ -16,4 +16,5 @@ public final class AppUserTypeSecurityExpressions {
     public static final String HAS_ROLE_GARAGE = "hasRole('GARAGE')";
     public static final String HAS_ROLE_ADMIN = "hasRole('ADMIN')";
     public static final String HAS_ROLE_GARAGE_OR_ADMIN = "hasRole('GARAGE') or hasRole('ADMIN')";
+    public static final String HAS_ROLE_GARAGE_OR_CAR_OWNER = "hasRole('GARAGE') or hasRole('CAR_OWNER')";
 }

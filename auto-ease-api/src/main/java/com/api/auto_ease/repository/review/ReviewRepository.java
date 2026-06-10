@@ -12,5 +12,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     List<Review> findByGarageIdOrderByCreatedDateDesc(UUID garageId);
 
-    boolean existsByBookingId(UUID bookingId);
+    boolean existsByJobRequestId(UUID jobRequestId);
+
+    java.util.Optional<Review> findByJobRequestId(UUID jobRequestId);
 }

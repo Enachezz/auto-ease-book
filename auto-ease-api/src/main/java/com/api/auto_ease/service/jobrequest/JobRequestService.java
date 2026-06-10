@@ -1,5 +1,7 @@
 package com.api.auto_ease.service.jobrequest;
 
+import com.api.auto_ease.domain.booking.Booking;
+import com.api.auto_ease.domain.booking.BookingStatus;
 import com.api.auto_ease.domain.car.Car;
 import com.api.auto_ease.domain.carMake.CarMake;
 import com.api.auto_ease.domain.carModel.CarModel;
@@ -8,17 +10,23 @@ import com.api.auto_ease.domain.garageCategory.GarageCategoryAssignment;
 import com.api.auto_ease.domain.jobrequest.JobRequest;
 import com.api.auto_ease.domain.jobrequest.JobRequestStatus;
 import com.api.auto_ease.domain.jobrequest.Urgency;
+import com.api.auto_ease.domain.quote.Quote;
+import com.api.auto_ease.domain.quote.QuoteStatus;
+import com.api.auto_ease.domain.review.Review;
 import com.api.auto_ease.domain.serviceCategory.ServiceCategory;
 import com.api.auto_ease.dto.jobrequest.CreateJobRequestRequest;
 import com.api.auto_ease.dto.jobrequest.JobRequestResponse;
 import com.api.auto_ease.dto.jobrequest.UpdateJobRequestRequest;
+import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.car.CarRepository;
 import com.api.auto_ease.repository.carMake.CarMakeRepository;
 import com.api.auto_ease.repository.carModel.CarModelRepository;
 import com.api.auto_ease.repository.garageCategory.GarageCategoryAssignmentRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
+import com.api.auto_ease.repository.review.ReviewRepository;
 import com.api.auto_ease.repository.serviceCategory.ServiceCategoryRepository;
+import com.api.auto_ease.service.garage.GarageJobAuthorization;
 import com.api.auto_ease.service.garage.GarageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,6 +51,9 @@ public class JobRequestService {
     private final CarModelRepository carModelRepository;
     private final GarageCategoryAssignmentRepository garageCategoryAssignmentRepository;
     private final GarageService garageService;
+    private final GarageJobAuthorization garageJobAuthorization;
+    private final BookingRepository bookingRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public JobRequestResponse createJobRequest(String userId, CreateJobRequestRequest request) {
@@ -190,6 +201,43 @@ public class JobRequestService {
     }
 
     @Transactional
+    public JobRequestResponse completeJob(String garageUserId, UUID jobRequestId) {
+        garageJobAuthorization.assertGarageUserMayMutateJob(garageUserId, jobRequestId);
+
+        JobRequest jobRequest = jobRequestRepository.findById(jobRequestId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
+
+        JobRequestStatus status = jobRequest.getStatus();
+        if (status != JobRequestStatus.BOOKED && status != JobRequestStatus.IN_PROGRESS) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Job can only be completed when status is BOOKED or IN_PROGRESS");
+        }
+
+        if (quoteRepository.existsByJobRequestIdAndStatus(jobRequestId, QuoteStatus.PENDING)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "All addendum quotes must be accepted or rejected before completing the job");
+        }
+
+        List<Quote> acceptedQuotes = quoteRepository.findByJobRequestIdAndStatus(jobRequestId, QuoteStatus.ACCEPTED);
+        List<UUID> acceptedQuoteIds = acceptedQuotes.stream().map(Quote::getId).toList();
+        List<Booking> bookings = bookingRepository.findByQuoteIdIn(acceptedQuoteIds);
+
+        if (bookings.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No bookings exist for this job request");
+        }
+
+        for (Booking booking : bookings) {
+            booking.setStatus(BookingStatus.COMPLETED);
+        }
+        bookingRepository.saveAll(bookings);
+
+        jobRequest.setStatus(JobRequestStatus.COMPLETED);
+        jobRequest = jobRequestRepository.save(jobRequest);
+
+        return toResponse(jobRequest);
+    }
+
+    @Transactional
     public void deleteJobRequest(String userId, UUID id) {
         JobRequest jobRequest = jobRequestRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job request not found"));
@@ -225,6 +273,12 @@ public class JobRequestService {
 
         int quoteCount = quoteRepository.countByJobRequestId(jobRequest.getId());
 
+        boolean reviewEligible = jobRequest.getStatus() == JobRequestStatus.COMPLETED
+                && !reviewRepository.existsByJobRequestId(jobRequest.getId());
+        UUID reviewId = reviewRepository.findByJobRequestId(jobRequest.getId())
+                .map(Review::getId)
+                .orElse(null);
+
         return JobRequestResponse.builder()
                 .id(jobRequest.getId())
                 .carId(jobRequest.getCarId())
@@ -244,6 +298,8 @@ public class JobRequestService {
                 .locationCity(jobRequest.getLocationCity())
                 .locationState(jobRequest.getLocationState())
                 .quoteCount(quoteCount)
+                .reviewEligible(reviewEligible)
+                .reviewId(reviewId)
                 .build();
     }
 }

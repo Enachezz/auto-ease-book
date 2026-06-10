@@ -73,4 +73,11 @@ public class JobRequestController {
         jobRequestService.deleteJobRequest(userId, id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/api/job-requests/{id}/complete")
+    @PreAuthorize(HAS_ROLE_GARAGE)
+    public JobRequestResponse completeJob(Authentication auth, @PathVariable UUID id) {
+        String userId = (String) auth.getPrincipal();
+        return jobRequestService.completeJob(userId, id);
+    }
 }

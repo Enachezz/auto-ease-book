@@ -1,6 +1,7 @@
 package com.api.auto_ease.repository.quote;
 
 import com.api.auto_ease.domain.quote.Quote;
+import com.api.auto_ease.domain.quote.QuoteStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +20,8 @@ public interface QuoteRepository extends JpaRepository<Quote, UUID> {
     int countByJobRequestId(UUID jobRequestId);
 
     List<Quote> findByJobRequestId(UUID jobRequestId);
+
+    boolean existsByJobRequestIdAndStatus(UUID jobRequestId, QuoteStatus status);
+
+    List<Quote> findByJobRequestIdAndStatus(UUID jobRequestId, QuoteStatus status);
 }

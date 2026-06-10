@@ -65,6 +65,12 @@ final class GarageSpecifications {
                 );
                 predicates.add(cb.exists(hasMake));
             }
+            if (criteria.getMinRating() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("averageRating"), criteria.getMinRating()));
+            }
+            if (criteria.getMinReviews() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("totalReviews"), criteria.getMinReviews()));
+            }
             if (predicates.isEmpty()) {
                 return cb.conjunction();
             }

@@ -16,28 +16,25 @@ import static java.time.LocalDateTime.now;
 @Getter
 @Setter
 @Entity
-@Table(name = "reviews")
-public class Review {
+@Table(name = "review_replies")
+public class ReviewReply {
 
     @Id
     @GeneratedValue
     @Column(updatable = false)
     private UUID id;
 
-    @Column(name = "job_request_id", nullable = false, unique = true)
-    private UUID jobRequestId;
+    @Column(name = "review_id", nullable = false)
+    private UUID reviewId;
 
-    @Column(name = "garage_id", nullable = false)
-    private UUID garageId;
+    @Column(name = "parent_reply_id")
+    private UUID parentReplyId;
 
-    @Column(name = "user_id", nullable = false, length = 50)
-    private String userId;
+    @Column(name = "author_user_id", nullable = false, length = 50)
+    private String authorUserId;
 
-    @Column(name = "rating", nullable = false)
-    private Integer rating;
-
-    @Column(name = "comment")
-    private String comment;
+    @Column(name = "message", nullable = false)
+    private String message;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;

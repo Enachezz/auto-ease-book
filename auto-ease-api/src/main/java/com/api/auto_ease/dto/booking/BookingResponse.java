@@ -20,6 +20,8 @@ public class BookingResponse {
     private UUID quoteId;
     private UUID garageId;
     private String garageName;
+    private String garagePhone;
+    private String clientPhone;
     private String jobTitle;
     private BigDecimal price;
     private LocalDate scheduledDate;

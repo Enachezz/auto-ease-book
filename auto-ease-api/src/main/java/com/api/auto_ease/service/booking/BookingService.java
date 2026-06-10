@@ -9,10 +9,11 @@ import com.api.auto_ease.domain.quote.Quote;
 import com.api.auto_ease.domain.quote.QuoteStatus;
 import com.api.auto_ease.dto.booking.AcceptQuoteRequest;
 import com.api.auto_ease.dto.booking.BookingResponse;
-import com.api.auto_ease.dto.garage.GarageResponse;
+import com.api.auto_ease.domain.profile.Profile;
 import com.api.auto_ease.repository.booking.BookingRepository;
 import com.api.auto_ease.repository.garage.GarageRepository;
 import com.api.auto_ease.repository.jobrequest.JobRequestRepository;
+import com.api.auto_ease.repository.profile.ProfileRepository;
 import com.api.auto_ease.repository.quote.QuoteRepository;
 import com.api.auto_ease.service.garage.GarageService;
 import com.api.auto_ease.service.quoteLog.QuoteLogService;
@@ -33,6 +34,7 @@ public class BookingService {
     private final JobRequestRepository jobRequestRepository;
     private final GarageService garageService;
     private final GarageRepository garageRepository;
+    private final ProfileRepository profileRepository;
     private final QuoteLogService quoteLogService;
 
     @Transactional
@@ -102,7 +104,10 @@ public class BookingService {
         }
 
         Garage garage = garageService.findApprovedGarageById(quote.getGarageId()).orElse(null);
-        return toResponse(booking, quote, jobRequest, garage);
+        String clientPhone = profileRepository.findByUserId(jobRequest.getUserId())
+                .map(Profile::getPhone)
+                .orElse(null);
+        return toResponse(booking, quote, jobRequest, garage, clientPhone);
     }
 
     public List<BookingResponse> getMyBookings(String userId) {
@@ -143,6 +148,10 @@ public class BookingService {
             }
         }
 
+        String clientPhone = profileRepository.findByUserId(userId)
+                .map(Profile::getPhone)
+                .orElse(null);
+
         return bookingRepository.findByQuoteIdIn(quoteIds).stream()
                 .map(booking -> {
                     Quote quote = quoteById.get(booking.getQuoteId());
@@ -150,7 +159,7 @@ public class BookingService {
                     Garage garage = quote != null
                             ? garageService.findApprovedGarageById(quote.getGarageId()).orElse(null)
                             : null;
-                    return toResponse(booking, quote, jobRequest, garage);
+                    return toResponse(booking, quote, jobRequest, garage, clientPhone);
                 })
                 .toList();
     }
@@ -171,21 +180,43 @@ public class BookingService {
         Map<UUID, Quote> quoteById = new HashMap<>();
         quotes.forEach(quote -> quoteById.put(quote.getId(), quote));
 
+        Map<UUID, JobRequest> jobRequestByQuoteId = new HashMap<>();
+        for (Quote quote : quotes) {
+            jobRequestRepository.findById(quote.getJobRequestId())
+                    .ifPresent(jobRequest -> jobRequestByQuoteId.put(quote.getId(), jobRequest));
+        }
+
+        Map<String, String> clientPhoneByUserId = new HashMap<>();
+        List<String> customerUserIds = jobRequestByQuoteId.values().stream()
+                .map(JobRequest::getUserId)
+                .distinct()
+                .toList();
+        if (!customerUserIds.isEmpty()) {
+            profileRepository.findByUserIdIn(customerUserIds).forEach(profile ->
+                    clientPhoneByUserId.put(profile.getUserId(), profile.getPhone()));
+        }
+
         return bookingRepository.findByQuoteIdIn(quoteIds).stream()
                 .map(booking -> {
                     Quote quote = quoteById.get(booking.getQuoteId());
-                    JobRequest jobRequest = quote != null ? jobRequestRepository.findById(quote.getJobRequestId()).orElse(null) : null;
-                    return toResponse(booking, quote, jobRequest, garage);
+                    JobRequest jobRequest = jobRequestByQuoteId.get(booking.getQuoteId());
+                    String clientPhone = jobRequest != null
+                            ? clientPhoneByUserId.get(jobRequest.getUserId())
+                            : null;
+                    return toResponse(booking, quote, jobRequest, garage, clientPhone);
                 })
                 .toList();
     }
 
-    private BookingResponse toResponse(Booking booking, Quote quote, JobRequest jobRequest, Garage garage) {
+    private BookingResponse toResponse(Booking booking, Quote quote, JobRequest jobRequest, Garage garage,
+                                       String clientPhone) {
         return BookingResponse.builder()
                 .id(booking.getId())
                 .quoteId(booking.getQuoteId())
                 .garageId(quote != null ? quote.getGarageId() : null)
                 .garageName(garage != null ? garage.getBusinessName() : "Unknown")
+                .garagePhone(garage != null ? garage.getPhone() : null)
+                .clientPhone(clientPhone)
                 .jobTitle(jobRequest != null ? jobRequest.getTitle() : "Unknown")
                 .price(quote != null ? quote.getPrice() : null)
                 .scheduledDate(booking.getScheduledDate())

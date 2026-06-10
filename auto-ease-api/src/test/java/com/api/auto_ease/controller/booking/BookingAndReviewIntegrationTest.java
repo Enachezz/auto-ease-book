@@ -33,12 +33,18 @@ class BookingAndReviewIntegrationTest {
     }
 
     private String registerAndGetToken(String email, String userType) {
-        var req = Map.of(
-                "email", email,
-                "password", "pass123",
-                "fullName", "Test User",
-                "userType", userType
-        );
+        return registerAndGetToken(email, userType, null);
+    }
+
+    private String registerAndGetToken(String email, String userType, String phone) {
+        var req = new HashMap<String, Object>();
+        req.put("email", email);
+        req.put("password", "pass123");
+        req.put("fullName", "Test User");
+        req.put("userType", userType);
+        if (phone != null) {
+            req.put("phone", phone);
+        }
         var resp = rest.postForEntity("/api/auth/register", req, Map.class);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         return (String) resp.getBody().get("token");
@@ -116,8 +122,8 @@ class BookingAndReviewIntegrationTest {
 
     record TestSetup(String ownerToken, String garageToken, String jobId, String quoteId, String garageId) {}
 
-    private TestSetup fullSetup() {
-        String ownerToken = registerAndGetToken(uniqueEmail(), "CAR_OWNER");
+    private TestSetup fullSetup(String ownerPhone) {
+        String ownerToken = registerAndGetToken(uniqueEmail(), "CAR_OWNER", ownerPhone);
         Map<String, Object> car = addCar(ownerToken);
         Map<String, Object> job = createJobRequest(ownerToken, car.get("id"));
 
@@ -127,6 +133,10 @@ class BookingAndReviewIntegrationTest {
 
         return new TestSetup(ownerToken, garageToken,
                 job.get("id").toString(), quote.get("id").toString(), garage.get("id").toString());
+    }
+
+    private TestSetup fullSetup() {
+        return fullSetup(null);
     }
 
     private void acceptQuote(String ownerToken, String quoteId, boolean addendumFlow) {
@@ -252,6 +262,43 @@ class BookingAndReviewIntegrationTest {
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         List<Map<String, Object>> bookings = resp.getBody();
         assertFalse(bookings.isEmpty());
+    }
+
+    @Test
+    void bookingIncludesContactPhonesWhenAvailable() {
+        TestSetup s = fullSetup("+40712345678");
+        acceptQuote(s.ownerToken(), s.quoteId(), false);
+
+        var ownerResp = rest.exchange("/api/bookings", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(s.ownerToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, ownerResp.getStatusCode());
+        Map<String, Object> ownerBooking = ownerResp.getBody().get(0);
+        assertEquals("+40741000000", ownerBooking.get("garagePhone"));
+        assertEquals("+40712345678", ownerBooking.get("clientPhone"));
+
+        var garageResp = rest.exchange("/api/bookings", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(s.garageToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        assertEquals(HttpStatus.OK, garageResp.getStatusCode());
+        Map<String, Object> garageBooking = garageResp.getBody().get(0);
+        assertEquals("+40741000000", garageBooking.get("garagePhone"));
+        assertEquals("+40712345678", garageBooking.get("clientPhone"));
+    }
+
+    @Test
+    void bookingOmitsClientPhoneWhenNotSet() {
+        TestSetup s = fullSetup();
+        acceptQuote(s.ownerToken(), s.quoteId(), false);
+
+        var resp = rest.exchange("/api/bookings", HttpMethod.GET,
+                new HttpEntity<>(bearerHeaders(s.garageToken)),
+                new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        Map<String, Object> booking = resp.getBody().get(0);
+        assertEquals("+40741000000", booking.get("garagePhone"));
+        assertNull(booking.get("clientPhone"));
     }
 
     @Test
